@@ -18,8 +18,28 @@ namespace GREWordGames.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+        public IActionResult MyWords()
         {
+            return View();
+        }
+
+        public IActionResult Practice()
+        {
+            return View();
+        }
+
+        public IActionResult AboutGame()
+        {
+            return View();
+        }
+
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        public IActionResult Register()
+        { 
             return View();
         }
 
