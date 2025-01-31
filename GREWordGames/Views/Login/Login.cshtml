@@ -1,0 +1,35 @@
+﻿
+@{
+    ViewData["Title"] = "Login";
+}
+
+@model GREWordGames.Models.UserDetails;
+
+<br /><br />
+<h1>Login</h1>
+
+<br /><br /><br /><br />
+
+<br />
+
+@using (Html.BeginForm("LoginAction", "Login", FormMethod.Post))
+{
+
+    <label for="Name" class="form-label">Name</label>
+    @Html.TextBoxFor(model => model.Name, new { @class = "form-control", @placeholder="name" })
+
+    <label for="Email" class="form-label">Email Address</label>
+    @Html.TextBoxFor(model => model.Email, new { @type = "email", @class = "form-control", @placeholder="name@example.com" })
+
+    <label for="Password" class="form-label">Password</label>
+    @Html.TextBoxFor(model => model.Password, new { @type = "password", @class = "form-control" })
+
+    <button class="btn btn-primary" type="submit">Login</button>
+}
+
+@using (Html.BeginForm("TraversalRegister", "Login", FormMethod.Post))
+{
+    <label for="RegisterText" class="form-label">Or Create an Account</label>
+    <br />
+    <button class="btn btn-primary" type="submit">Register</button>
+}
