@@ -39,5 +39,40 @@ namespace GREWordGames.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
+        [HttpPost]
+        public ActionResult GoToHome()
+        {
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public ActionResult GoToMyWords()
+        {
+            return RedirectToAction("MyWords");
+        }
+
+        [HttpPost]
+        public ActionResult GoToMyPractice()
+        {
+            return RedirectToAction("Practice");
+        }
+
+        [HttpPost]
+        public ActionResult GoToAboutGame()
+        {
+            return RedirectToAction("AboutGame");
+        }
+
+        [HttpPost]
+        public ActionResult GoToLogin()
+        {
+            return RedirectToAction("Login");
+        }
+
+        [HttpPost]
+        public ActionResult GoToRegister()
+        {
+            return RedirectToAction("Register");
+        }
     }
 }

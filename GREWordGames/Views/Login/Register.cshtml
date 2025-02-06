@@ -25,10 +25,7 @@
     <button class="btn btn-primary" type="submit">Register</button>
 }
 
-@using (Html.BeginForm("TraversalLogin", "Login", FormMethod.Post))
+@using (Html.BeginForm("GoToLogin", "Home", FormMethod.Post))
 {
-    <label for="RegisterText" class="form-label">Or Sign In</label>
-    <br />
     <button class="btn btn-primary" type="submit">Login</button>
 }
-

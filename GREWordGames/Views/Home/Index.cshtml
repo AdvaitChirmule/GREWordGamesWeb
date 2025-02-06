@@ -6,3 +6,18 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+@using (Html.BeginForm("GoToLogin", "Home", FormMethod.Post))
+{
+    <button class="btn btn-primary" type="submit">Login</button>
+}
+
+@using (Html.BeginForm("GoToRegister", "Home", FormMethod.Post))
+{
+    <button class="btn btn-primary" type="submit">Register</button>
+}
+
+@using (Html.BeginForm("GoToMyWords", "Home", FormMethod.Post))
+{
+    <button class="btn btn-primary" type="submit">MyWords</button>
+}

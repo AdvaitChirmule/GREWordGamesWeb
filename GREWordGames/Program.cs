@@ -1,6 +1,21 @@
+using System.Net;
+using Firebase.Auth.Providers;
+using Firebase.Auth;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+var firebaseConfig = new FirebaseAuthConfig
+{
+    ApiKey = "AIzaSyC7924TdN6r2y43MwQs07_kZdioi3aH5Fg",
+    AuthDomain = "grewordgames.firebaseapp.com",
+    Providers = new FirebaseAuthProvider[]
+    {
+        new EmailProvider()
+    }
+};
+
+builder.Services.AddSingleton(new FirebaseAuthClient(firebaseConfig));
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
