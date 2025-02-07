@@ -13,14 +13,31 @@ namespace GREWordGames.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(UserAuthenticated userAuthenticated)
         {
+            var token = HttpContext.Session.GetString("token");
+            if (string.IsNullOrEmpty(token))
+            {
+                userAuthenticated.Condition = true;
+            }
+            else
+            {
+                userAuthenticated.Condition = false;
+            }
             return View();
         }
 
         public IActionResult MyWords()
         {
-            return View();
+            var token = HttpContext.Session.GetString("token");
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login");
+            }
+            else
+            {
+                return View();
+            }
         }
 
         public IActionResult Practice()
@@ -40,15 +57,32 @@ namespace GREWordGames.Controllers
         }
 
         [HttpPost]
-        public ActionResult GoToHome()
+        public ActionResult GoToHome(UserAuthenticated userAuthenticated)
         {
+            var token = HttpContext.Session.GetString("token");
+            if (string.IsNullOrEmpty(token))
+            {
+                userAuthenticated.Condition = true;
+            }
+            else
+            {
+                userAuthenticated.Condition = false;
+            }
             return RedirectToAction("Index");
         }
 
         [HttpPost]
         public ActionResult GoToMyWords()
         {
-            return RedirectToAction("MyWords");
+            var token = HttpContext.Session.GetString("token");
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login");
+            }
+            else
+            {
+                return RedirectToAction("MyWords");
+            }
         }
 
         [HttpPost]

@@ -8,4 +8,10 @@
         public string PasswordRe {  get; set; }
 
     }
+
+    public class UserAuthenticated
+    {
+        public bool Condition { get; set; }
+        public string Name { get; set; }
+    }
 }

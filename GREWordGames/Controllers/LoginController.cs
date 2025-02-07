@@ -15,21 +15,6 @@ namespace GREWordGames.Controllers
             _firebaseAuth = firebaseAuth;
         }
 
-        public async Task<string?> RegisterFirebase(string email, string password)
-        {
-            var userCredentials = await _firebaseAuth.CreateUserWithEmailAndPasswordAsync(email, password);
-            return userCredentials is null ? null : await userCredentials.User.GetIdTokenAsync();
-        }
-
-        public async Task<string?> LoginFirebase(string email, string password)
-        {
-            var userCredentials = await _firebaseAuth.SignInWithEmailAndPasswordAsync(email, password);
-            return userCredentials is null ? null : await userCredentials.User.GetIdTokenAsync();
-        }
-
-        public void SignOut() => _firebaseAuth.SignOut();
-
-
         public IActionResult Login()
         {
             return View();
@@ -38,6 +23,13 @@ namespace GREWordGames.Controllers
         public IActionResult Register()
         {
             return View();
+        }
+
+        public IActionResult SignOutUser()
+        {
+            _firebaseAuth.SignOut();
+            HttpContext.Session.Remove("token");
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -52,6 +44,7 @@ namespace GREWordGames.Controllers
                 if (userCredentials != null)
                 {
                     var token = await userCredentials.User.GetIdTokenAsync();
+                    HttpContext.Session.SetString("token", token);
                     return RedirectToAction("MyWords");
                 }
                 else

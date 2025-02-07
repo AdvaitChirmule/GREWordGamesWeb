@@ -1,4 +1,10 @@
 ﻿<!DOCTYPE html>
+
+@{
+    var token = this.ViewContext.HttpContext.Session.GetString("token");
+    bool isAuthenticated = !string.IsNullOrEmpty(token);
+}
+
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -33,6 +39,29 @@
                         </li>
                     </ul>
                 </div>
+                @if (isAuthenticated)
+                {
+                    <div class="d-flex flex-row-reverse">
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="SignOutUser">Sign Out</a>
+                            </li>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-row-reverse">
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Register">Register</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Login">Login</a>
+                            </li>
+                        </ul>
+                    </div>
+                }
             </div>
         </nav>
     </header>
