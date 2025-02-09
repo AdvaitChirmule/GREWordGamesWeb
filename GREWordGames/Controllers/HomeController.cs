@@ -1,6 +1,10 @@
 using System.Diagnostics;
 using GREWordGames.Models;
 using Microsoft.AspNetCore.Mvc;
+using Firebase.Database;
+using Firebase.Database.Query;
+using Firebase.Auth;
+using Newtonsoft.Json;
 
 namespace GREWordGames.Controllers
 {
@@ -27,7 +31,7 @@ namespace GREWordGames.Controllers
             return View();
         }
 
-        public IActionResult MyWords()
+        public async Task<IActionResult> MyWords()
         {
             var token = HttpContext.Session.GetString("token");
             if (string.IsNullOrEmpty(token))
@@ -36,7 +40,16 @@ namespace GREWordGames.Controllers
             }
             else
             {
-                return View();
+                var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
+                    new FirebaseOptions
+                    {
+                        AuthTokenAsyncFactory = () => Task.FromResult(token)
+                    });
+
+                var uid = HttpContext.Session.GetString("uid");
+                var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
+                
+                return View(userDetails);
             }
         }
 
@@ -74,15 +87,7 @@ namespace GREWordGames.Controllers
         [HttpPost]
         public ActionResult GoToMyWords()
         {
-            var token = HttpContext.Session.GetString("token");
-            if (string.IsNullOrEmpty(token))
-            {
-                return RedirectToAction("Login");
-            }
-            else
-            {
-                return RedirectToAction("MyWords");
-            }
+            return RedirectToAction("MyWords");
         }
 
         [HttpPost]

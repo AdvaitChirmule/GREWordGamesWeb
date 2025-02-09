@@ -1,6 +1,8 @@
 ﻿using Firebase.Auth;
+using Firebase.Database;
 using GREWordGames.Models;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
@@ -33,18 +35,20 @@ namespace GREWordGames.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> LoginAction(UserDetails UserDetails)
+        public async Task<ActionResult> LoginAction(UserDetails userDetails, UserMetadata userMetadata)
         {
-            string name = UserDetails.Name;
-            string email = UserDetails.Email;
-            string password = UserDetails.Password;
+            string name = userDetails.Name;
+            string email = userDetails.Email;
+            string password = userDetails.Password;
             try
             {
                 var userCredentials = await _firebaseAuth.SignInWithEmailAndPasswordAsync(email, password);
                 if (userCredentials != null)
                 {
                     var token = await userCredentials.User.GetIdTokenAsync();
+                    var uid = userCredentials.User.Uid;
                     HttpContext.Session.SetString("token", token);
+                    HttpContext.Session.SetString("uid", uid);
                     return RedirectToAction("MyWords");
                 }
                 else
@@ -59,14 +63,9 @@ namespace GREWordGames.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> RegisterAction(UserDetails UserDetails)
+        public async Task<ActionResult> RegisterAction(UserDetails userDetails)
         {
-            string name = UserDetails.Name;
-            string email = UserDetails.Email;
-            string password = UserDetails.Password;
-            string passwordReentered = UserDetails.PasswordRe;
-
-            if (password != passwordReentered)
+            if (userDetails.Password != userDetails.PasswordReentered)
             {
                 return RedirectToAction("Register");
             }
@@ -74,7 +73,7 @@ namespace GREWordGames.Controllers
             {
                 try
                 {
-                    var userCredentials = await _firebaseAuth.CreateUserWithEmailAndPasswordAsync(email, password);
+                    var userCredentials = await _firebaseAuth.CreateUserWithEmailAndPasswordAsync(userDetails.Email, userDetails.Password);
                     if (userCredentials != null)
                     {
                         return RedirectToAction("MyWords");
