@@ -2,38 +2,42 @@
     ViewData["Title"] = "My Words";
 }
 
-@model GREWordGames.Models.UserMetadata
+@model WordViewModel
 
 <h1>@ViewData["Title"]</h1>
 
 <p>Use this page to detail your site's privacy policy.</p>
 
 @using (Html.BeginForm("GoToHome", "Home", FormMethod.Post))
-{
+{{
     <button class="btn btn-primary" type="submit">Home</button>
-}
+}}
 
 @using (Html.BeginForm("GoToLogin", "Home", FormMethod.Post))
-{
+{{
     <button class="btn btn-primary" type="submit">Login</button>
-}
+}}
 
 @using (Html.BeginForm("GoToRegister", "Home", FormMethod.Post))
-{
+{{
     <button class="btn btn-primary" type="submit">Register</button>
-}
+}}
 
-<div id="hi"></div>
-<div id="hi2"></div>
-<div id="hi3"></div>
+@using (Html.BeginForm("AddWordAction", "Home", FormMethod.Post))
+{{
+    <label for="Name" class="form-label">Add Word</label>
+    @Html.TextBoxFor(model => model.AddWord.Word, new { @class = "form-control", @placeholder = "Add A Word" })
+
+    <button class="btn btn-primary" type="submit">Add Word</button>
+}}
 
 <table class="table" id="table">
     <thead>
         <tr>
-            <th scope="col">Sr No</th>
-            <th scope="col">Word</th>
-            <th scope="col">Date Added</th>
-            <th scope="col">Proficiency</th>
+            <th scope="col"><button class="btn btn-primary" onclick="sortByDateAdded()">Sr No.</button></th>
+            <th scope="col"><button class="btn btn-primary" onclick="sortByWord()">Words</button></th>
+            <th scope="col"><button class="btn btn-primary" onclick="sortByDateAdded()">Date Added</button></th>
+            <th scope="col"><button class="btn btn-primary">Proficiency</button></th>
         </tr>
     </thead>
     <tbody>
@@ -42,92 +46,113 @@
 </table>
 
 <script>
-    var userMetadataRaw = @Html.Raw(Json.Serialize(Model));  // Serialize C# model to JSON
+    var modelOutput = @Html.Raw(Json.Serialize(Model));  // Serialize C# model to JSON
 
+    var userMetadataRaw = modelOutput.userMetadata;
+
+    console.log(userMetadataRaw)
     var table = document.getElementById("table")
 
-    var wordsRaw = userMetadataRaw.words.slice(1, (userMetadataRaw.words.length) - 1).split(", ")
-    var dateAddedRaw = userMetadataRaw.dateAdded.slice(1, (userMetadataRaw.dateAdded.length) - 1).split(", ")
-    var proficiencyRaw = userMetadataRaw.proficiency.slice(1, (userMetadataRaw.proficiency.length) - 1).split(", ")
+    var wordIndexes = [[], [], [], []]
 
-    for (let i = 0; i < dateAddedRaw.length; i++) 
-    {
-        var row = table.insertRow(i+1);
+    wordIndexes[1] = userMetadataRaw.words.slice(1, (userMetadataRaw.words.length) - 1).split(", ")
+    wordIndexes[2] = userMetadataRaw.dateAdded.slice(1, (userMetadataRaw.dateAdded.length) - 1).split(", ")
+    wordIndexes[3] = userMetadataRaw.proficiency.slice(1, (userMetadataRaw.proficiency.length) - 1).split(", ")
+    wordIndexes[0] = Array.from(Array(wordIndexes[1].length).keys())
 
-        var cell0 = row.insertCell(0);
-        var cell1 = row.insertCell(1);
-        var cell2 = row.insertCell(2);
-        var cell3 = row.insertCell(3);
+    console.log(wordIndexes)
 
-        cell0.innerHTML = i+1
-        cell1.innerHTML = wordsRaw[i]
+    PopulateTable()
 
-        var dateDifferenceMS = Date.now() - Date.parse(dateAddedRaw[i]);
-        var dateDifference = new Date(dateDifferenceMS).toISOString();
-
-        differenceString = ''
-        year = parseInt(dateDifference.slice(0, 4)) - 1970
-        month = parseInt(dateDifference.slice(5, 7)) - 1
-        day = parseInt(dateDifference.slice(8, 10)) - 1
-        hours = parseInt(dateDifference.slice(11, 13))
-        minutes = parseInt(dateDifference.slice(14, 16))
-        if (year > 0) {
-            if (year == 1) {
-                differenceString = "1 year ago"
-            }
-            else {
-                differenceString = year.toString() + " years ago"
-            }
-        }
-        else if (month > 0) {
-            if (month == 1) {
-                differenceString = "1 month ago"
-            }
-            else {
-                differenceString = month.toString() + " months ago"
-            }
-        }
-        else if (day > 0) {
-            if (day == 1) {
-                differenceString = "1 day ago"
-            }
-            else {
-                differenceString = day.toString() + " days ago"
-            }
-        }
-        else if (hours > 0) {
-            if (hours == 1) {
-                differenceString = "1 hour ago"
-            }
-            else {
-                differenceString = hours.toString() + " days ago"
-            }
-        }
-        else if (minutes > 0) {
-            if (minutes == 1) {
-                differenceString = "1 minute ago"
-            }
-            else {
-                differenceString = minutes.toString() + " minutes ago"
-            }
-        }
-        else {
-            differenceString = "now"
-        }
-
-        cell2.innerHTML = differenceString;
-
-
-        proficiency = proficiencyRaw[i].slice(1, proficiencyRaw[i].length-1).split("|")
-        if (parseInt(proficiency[1]) == 0) {
-            cell3.innerHTML = "0%"
-        }
-        else {
-            cell3.innerHTML = (parseInt(proficiency[0]) / parseInt(proficiency[1])).toString() + '%'
-        }
+    function sortByWord() {
+        wordIndexes.sort((x, y) => x[1] - y[1]);
+        console.log(wordIndexes)
+        PopulateTable();
     }
 
+    function sortByDateAdded() {
+        wordIndexes.sort((x, y) => x[0] - y[0]);
+        console.log(wordIndexes)
+        PopulateTable();
+    }
+
+    function PopulateTable()
+    {
+        for (let i = 0; i < wordIndexes[0].length; i++) {
+            var row = table.insertRow(i + 1);
+
+            var cell0 = row.insertCell(0);
+            var cell1 = row.insertCell(1);
+            var cell2 = row.insertCell(2);
+            var cell3 = row.insertCell(3);
+
+            cell0.innerHTML = i + 1
+            cell1.innerHTML = wordIndexes[1][i]
+
+            var dateDifferenceMS = Date.now() - Date.parse(wordIndexes[2][i]);
+            var dateDifference = new Date(dateDifferenceMS).toISOString();
+
+            differenceString = ''
+            year = parseInt(dateDifference.slice(0, 4)) - 1970
+            month = parseInt(dateDifference.slice(5, 7)) - 1
+            day = parseInt(dateDifference.slice(8, 10)) - 1
+            hours = parseInt(dateDifference.slice(11, 13))
+            minutes = parseInt(dateDifference.slice(14, 16))
+            if (year > 0) {
+                if (year == 1) {
+                    differenceString = "1 year ago"
+                }
+                else {
+                    differenceString = year.toString() + " years ago"
+                }
+            }
+            else if (month > 0) {
+                if (month == 1) {
+                    differenceString = "1 month ago"
+                }
+                else {
+                    differenceString = month.toString() + " months ago"
+                }
+            }
+            else if (day > 0) {
+                if (day == 1) {
+                    differenceString = "1 day ago"
+                }
+                else {
+                    differenceString = day.toString() + " days ago"
+                }
+            }
+            else if (hours > 0) {
+                if (hours == 1) {
+                    differenceString = "1 hour ago"
+                }
+                else {
+                    differenceString = hours.toString() + " days ago"
+                }
+            }
+            else if (minutes > 0) {
+                if (minutes == 1) {
+                    differenceString = "1 minute ago"
+                }
+                else {
+                    differenceString = minutes.toString() + " minutes ago"
+                }
+            }
+            else {
+                differenceString = "now"
+            }
+
+            cell2.innerHTML = differenceString;
 
 
+            proficiency = wordIndexes[3][i].slice(1, wordIndexes[3][i].length - 1).split("|")
+            if (parseInt(proficiency[1]) == 0) {
+                cell3.innerHTML = "0%"
+            }
+            else {
+                cell3.innerHTML = (parseFloat(100 * parseInt(proficiency[0]) / parseInt(proficiency[1])).toFixed(2)).toString() + '%'
+            }
+        }
+    }
 
 </script>

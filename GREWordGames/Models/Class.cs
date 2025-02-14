@@ -34,4 +34,15 @@
         public bool stateWaitingRoom { get; set; }
         public int stateRoomNumber { get; set; }
     }
+
+    public class AddWord
+    {
+        public string Word { get; set; }
+    }
+
+    public class WordViewModel
+    {
+        public UserMetadata UserMetadata { get; set; }
+        public AddWord AddWord { get; set; }
+    }
 }

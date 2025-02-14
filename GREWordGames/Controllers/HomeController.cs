@@ -5,6 +5,10 @@ using Firebase.Database;
 using Firebase.Database.Query;
 using Firebase.Auth;
 using Newtonsoft.Json;
+using NuGet.Common;
+using System.Reflection;
+using FirebaseAdmin.Auth;
+using UserMetadata = GREWordGames.Models.UserMetadata;
 
 namespace GREWordGames.Controllers
 {
@@ -48,8 +52,14 @@ namespace GREWordGames.Controllers
 
                 var uid = HttpContext.Session.GetString("uid");
                 var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
-                
-                return View(userDetails);
+                var emptyWord = new AddWord { Word = "" };
+
+                var model = new WordViewModel
+                {
+                    UserMetadata = userDetails,
+                    AddWord = emptyWord
+                };
+                return View(model);
             }
         }
 
@@ -112,6 +122,28 @@ namespace GREWordGames.Controllers
         public ActionResult GoToRegister()
         {
             return RedirectToAction("Register");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddWordAction(WordViewModel model)
+        {
+            var addWord = model.AddWord;
+            var token = HttpContext.Session.GetString("token");
+            var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
+                    new FirebaseOptions
+                    {
+                        AuthTokenAsyncFactory = () => Task.FromResult(token)
+                    });
+
+            var uid = HttpContext.Session.GetString("uid");
+            var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
+
+            var wordList = userDetails.words;
+            wordList = wordList.Substring(0, wordList.Length - 1) + ", " + addWord.Word + "]";
+
+            userDetails.words = wordList;
+
+            return RedirectToAction("MyWords");
         }
     }
 }
