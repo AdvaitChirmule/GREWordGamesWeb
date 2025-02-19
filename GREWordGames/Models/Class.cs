@@ -17,8 +17,8 @@
 
     public class WordMetadata
     {
-        public int Id { get; set; }
-        public string WordMeaning { get; set; }
+        public int id { get; set; }
+        public string wordMeaning { get; set; }
     }
 
     public class UserMetadata
@@ -40,9 +40,23 @@
         public string Word { get; set; }
     }
 
+    public class Message
+    {
+        public string NotificationMessage { get; set; }
+    }
+
+    public class WordMuseAPIJSON
+    {
+        public string word { get; set; }
+        public int score { get; set; }
+        public int numSyllabus { get; set; }
+        public List<string> defs { get; set; }
+    }
+
     public class WordViewModel
     {
         public UserMetadata UserMetadata { get; set; }
         public AddWord AddWord { get; set; }
+        public Message Message { get; set; }
     }
 }

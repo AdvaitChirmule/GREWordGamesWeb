@@ -31,6 +31,17 @@
     <button class="btn btn-primary" type="submit">Add Word</button>
 }}
 
+<div id="notificationBar"></div>
+
+<script>
+    var modelOutput = @Html.Raw(Json.Serialize(Model));
+    var message = modelOutput.message.notificationMessage;
+
+    var messageBar = document.getElementById("notificationBar")
+    messageBar.innerHTML = message;
+
+</script>
+
 <table class="table" id="table">
     <thead>
         <tr>
@@ -50,7 +61,6 @@
 
     var userMetadataRaw = modelOutput.userMetadata;
 
-    console.log(userMetadataRaw)
     var table = document.getElementById("table")
 
     var wordIndexes = [[], [], [], []]
