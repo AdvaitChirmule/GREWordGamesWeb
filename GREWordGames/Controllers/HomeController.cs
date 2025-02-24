@@ -16,13 +16,15 @@ namespace GREWordGames.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
         private readonly WordMuseAPI _wordMuseAPI;
+        private readonly CommonFunctions _commonFunctions;
+        private readonly PracticePageFunctions _practicePageFunctions;
 
         public HomeController(ILogger<HomeController> logger)
         {
-            _logger = logger;
             _wordMuseAPI = new WordMuseAPI();
+            _commonFunctions = new CommonFunctions();
+            _practicePageFunctions = new PracticePageFunctions();
         }
 
         public IActionResult Index(UserAuthenticated userAuthenticated)
@@ -79,9 +81,30 @@ namespace GREWordGames.Controllers
             }
         }
 
-        public IActionResult Practice()
+        public async Task<IActionResult> Practice()
         {
-            return View();
+            var token = HttpContext.Session.GetString("token");
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login");
+            }
+            else
+            {
+                var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
+                    new FirebaseOptions
+                    {
+                        AuthTokenAsyncFactory = () => Task.FromResult(token)
+                    });
+
+                var uid = HttpContext.Session.GetString("uid");
+                var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
+
+                var user = _commonFunctions.ConvertRawDataToList(userDetails);
+
+                var wordSegregated = _practicePageFunctions.SegregateByUserDifficulty(user);
+
+                return View();
+            }
         }
 
         public IActionResult AboutGame()
@@ -145,6 +168,12 @@ namespace GREWordGames.Controllers
         {
             var addWord = model.AddWord;
             var token = HttpContext.Session.GetString("token");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                RedirectToAction("Login");
+            }
+
             var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
                     new FirebaseOptions
                     {
@@ -165,45 +194,20 @@ namespace GREWordGames.Controllers
 
             if (globalDictionaryCheck == null)
             {
-                bool addWordSuccess = await AddWordToGlobalDictionary(addWord.Word);
-                if (!addWordSuccess)
+                string addWordMessage = await _wordMuseAPI.SetWordToGlobalDatabase(addWord.Word, token);
+                if (addWordMessage != "Success")
                 {
+                    TempData["Message"] = addWordMessage;
                     return RedirectToAction("MyWords");
                 }
             }
 
-            var wordList = userDetails.words.Substring(0, userDetails.words.Length - 1) + ", " + addWord.Word + "]";
-            userDetails.words = wordList;
+            var updatedUserDetails = _wordMuseAPI.AddWordToFirebase(userDetails, addWord.Word);
 
-            var nowTime = DateTime.UtcNow;
-            var dateAddedList = userDetails.dateAdded.Substring(0, userDetails.dateAdded.Length - 1) + ", " + nowTime.ToString("s") + ".000Z]";
-            userDetails.dateAdded = dateAddedList;
-
-            var proficiencyList = userDetails.proficiency.Substring(0, userDetails.proficiency.Length - 1) + ", (0|0)]";
-            userDetails.proficiency = proficiencyList;
-
-            userDetails.wordCount = userDetails.wordCount + 1;
-
-
-            await firebaseClient.Child("metadata").Child(uid).PutAsync(userDetails);
+            await firebaseClient.Child("metadata").Child(uid).PutAsync(updatedUserDetails);
 
             TempData["Message"] = "Successfully added Word to Database";
             return RedirectToAction("MyWords");
-        }
-        public async Task<bool> AddWordToGlobalDictionary(string word)
-        {
-            var token = HttpContext.Session.GetString("token");
-            var wordMuseOutput = await _wordMuseAPI.SetWordToGlobalDatabase(word, token);
-            if (wordMuseOutput == "Success")
-            {
-                TempData["Message"] = "Success";
-                return true;
-            }
-            else
-            {
-                TempData["Message"] = wordMuseOutput;
-                return false;
-            }
         }
     }
 }

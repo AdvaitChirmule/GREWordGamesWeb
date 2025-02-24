@@ -35,6 +35,13 @@
         public int stateRoomNumber { get; set; }
     }
 
+    public class UserClass
+    {
+        public List<string> wordList { get; set; }
+        public List<string> dateAddedList { get; set; }
+        public List<string> proficiencyList { get; set; }
+    }
+
     public class AddWord
     {
         public string Word { get; set; }

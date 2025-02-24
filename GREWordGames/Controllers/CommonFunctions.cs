@@ -1,0 +1,64 @@
+﻿using GREWordGames.Models;
+using System.Diagnostics;
+namespace GREWordGames.Controllers
+{
+    public class CommonFunctions
+    {
+        public UserClass ConvertRawDataToList(UserMetadata userDetails)
+        {
+            var wordList = userDetails.words[1..^1].Split(", ").ToList();
+            var dateAddedList = userDetails.dateAdded[1..^1].Split(", ").ToList();
+            var proficiencyList = userDetails.proficiency[1..^1].Split(", ").ToList();
+
+            var user = new UserClass { wordList = wordList, dateAddedList = dateAddedList, proficiencyList = proficiencyList};
+            return user;
+        }
+
+        public bool isNewWord(string proficiency)
+        {
+            var proficiencyRaw = proficiency[1..^1];
+            var divide = proficiencyRaw.Split('|');
+            var denominator = int.Parse(divide[1]);
+            if (denominator <= 5)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public List<string> ProficiencyPercentage(List<string> proficiencies)
+        {
+            for (int i = 0; i < proficiencies.Count; i++)
+            {
+                var proficiencyRaw = proficiencies[i][1..^1];
+                var divide = proficiencyRaw.Split('|');
+                var numerator = int.Parse(divide[0]);
+                var denominator = int.Parse(divide[1]);
+                float percentage = 0;
+                if (numerator != 0)
+                {
+                    percentage = (float)numerator / denominator;
+                }
+                proficiencies[i] = percentage.ToString("0.00");
+            }
+            return proficiencies;
+        }
+
+        public string ProficiencyPercentage(string proficiency)
+        {
+            var proficiencyRaw = proficiency[1..^1];
+            var divide = proficiencyRaw.Split('|');
+            var numerator = int.Parse(divide[0]);
+            var denominator = int.Parse(divide[1]);
+            float percentage = 0;
+            if (numerator != 0)
+            {
+                percentage = (float)numerator / denominator;
+            }
+            proficiency = percentage.ToString("0.00");
+            return proficiency;
+        }
+    }
+}

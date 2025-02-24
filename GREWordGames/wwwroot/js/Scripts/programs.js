@@ -1,4 +1,4 @@
-function HowOld(String dateDifference)
+function HowOld(dateDifference)
 {
     differenceString = ''
     year = parseInt(dateDifference.slice(0, 4)) - 1970

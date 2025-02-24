@@ -18,7 +18,24 @@ namespace GREWordGames.Controllers
             _httpClient = new HttpClient();
         }
 
-        public async Task<String> SetWordToGlobalDatabase(String word, String token)
+        public UserMetadata AddWordToFirebase(UserMetadata userDetails, string word)
+        {
+            var wordList = userDetails.words.Substring(0, userDetails.words.Length - 1) + ", " + word + "]";
+            userDetails.words = wordList;
+
+            var nowTime = DateTime.UtcNow;
+            var dateAddedList = userDetails.dateAdded.Substring(0, userDetails.dateAdded.Length - 1) + ", " + nowTime.ToString("s") + ".000Z]";
+            userDetails.dateAdded = dateAddedList;
+
+            var proficiencyList = userDetails.proficiency.Substring(0, userDetails.proficiency.Length - 1) + ", (0|0)]";
+            userDetails.proficiency = proficiencyList;
+
+            userDetails.wordCount = userDetails.wordCount + 1;
+
+            return userDetails;
+        }
+
+        public async Task<String> SetWordToGlobalDatabase(string word, string token)
         {
             string wordMuseURL = "https://api.datamuse.com/words?sl=" + word + "&max=10&md=d";
             try
