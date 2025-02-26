@@ -6,6 +6,7 @@ using Firebase.Database;
 using Microsoft.AspNetCore.Http;
 using Firebase.Database.Query;
 using System.Collections.Generic;
+using NuGet.Common;
 
 namespace GREWordGames.Controllers
 {
@@ -86,6 +87,25 @@ namespace GREWordGames.Controllers
             {
                 return "Unexpected Server Error while adding Word to the Database";
             }
+        }
+
+        public async Task<List<string>> GetUserWordMeanings(List<string> words, string token)
+        {
+            List<string> wordMeanings = new List<string>();
+
+            var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
+                    new FirebaseOptions
+                    {
+                        AuthTokenAsyncFactory = () => Task.FromResult(token)
+                    });
+
+            foreach (string word in words)
+            {
+                var wordDetails = await firebaseClient.Child("words").Child(word).OnceSingleAsync<WordMetadata>();
+                wordMeanings.Add(wordDetails.wordMeaning);
+            }
+
+            return wordMeanings;
         }
     }
 }

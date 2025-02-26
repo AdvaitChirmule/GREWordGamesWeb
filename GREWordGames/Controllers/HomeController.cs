@@ -10,6 +10,7 @@ using System.Reflection;
 using FirebaseAdmin.Auth;
 using UserMetadata = GREWordGames.Models.UserMetadata;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 
 namespace GREWordGames.Controllers
 
@@ -98,12 +99,15 @@ namespace GREWordGames.Controllers
 
                 var uid = HttpContext.Session.GetString("uid");
                 var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
-
                 var user = _commonFunctions.ConvertRawDataToList(userDetails);
 
                 var wordSegregated = _practicePageFunctions.SegregateByUserDifficulty(user);
+                List<string> wordOrder = _practicePageFunctions.ReorderWordsBasedOnDifficulty(wordSegregated, 0);
+                List<string> wordMeanings = await _wordMuseAPI.GetUserWordMeanings(wordOrder, token);
 
-                return View();
+                var wordAndWordMeanings = new WordAndWordMeanings { words = wordOrder, wordsMeaning = wordMeanings };
+
+                return View(wordAndWordMeanings);
             }
         }
 

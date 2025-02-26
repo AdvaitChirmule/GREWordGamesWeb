@@ -60,6 +60,12 @@
         public List<string> defs { get; set; }
     }
 
+    public class WordAndWordMeanings
+    {
+        public List<string> words { get; set; }
+        public List<string> wordsMeaning { get; set; }
+    }
+
     public class WordViewModel
     {
         public UserMetadata UserMetadata { get; set; }

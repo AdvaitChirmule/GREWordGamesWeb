@@ -43,5 +43,39 @@ namespace GREWordGames.Controllers
 
             return (newWords, difficultWords, goodWords, excellentWords);
         }
+
+        public List<string> ReorderWordsBasedOnDifficulty((List<string>, List<string>, List<string>, List<string>) wordSegregated, int difficulty)
+        {
+            switch(difficulty)
+            {
+                case 0:
+                    List<string> allWordsList =
+                    [
+                        .. wordSegregated.Item1,
+                        .. wordSegregated.Item2,
+                        .. wordSegregated.Item3,
+                        .. wordSegregated.Item4,
+                    ];
+
+                    HashSet<int> indexSet = new HashSet<int>();
+                    List<string> consolidatedList = new List<string>();
+                    Random random = new Random();
+                    
+                    while (indexSet.Count < allWordsList.Count)
+                    {
+                        int newIndex = random.Next(allWordsList.Count);
+                        if (!indexSet.Contains(newIndex))
+                        {
+                            indexSet.Add(newIndex);
+                            consolidatedList.Add(allWordsList[newIndex]);
+                        }
+                    }    
+                    return consolidatedList;
+
+
+                default:
+                    return new List<string>();
+            }
+        }
     }
 }
