@@ -89,21 +89,16 @@ namespace GREWordGames.Controllers
             }
         }
 
-        public async Task<List<string>> GetUserWordMeanings(List<string> words, string token)
+        public async Task<string> GetWordMeaning(string word, string token)
         {
-            List<string> wordMeanings = new List<string>();
-
             var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
                     new FirebaseOptions
                     {
                         AuthTokenAsyncFactory = () => Task.FromResult(token)
                     });
 
-            foreach (string word in words)
-            {
-                var wordDetails = await firebaseClient.Child("words").Child(word).OnceSingleAsync<WordMetadata>();
-                wordMeanings.Add(wordDetails.wordMeaning);
-            }
+            var wordDetails = await firebaseClient.Child("words").Child(word).OnceSingleAsync<WordMetadata>();
+            string wordMeanings = wordDetails.wordMeaning;
 
             return wordMeanings;
         }

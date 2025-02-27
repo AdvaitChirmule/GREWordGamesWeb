@@ -3,5 +3,158 @@
     ViewData["Title"] = "Practice";
 }
 
+@model AllWords
+
 <h1>Practice</h1>
 
+<div id="wordPlaceholder"></div>
+<div id="wordMeaningPlaceholder"></div>
+
+<button class="btn btn-primary" id="submitButton" onclick="submitWord()">Submit</button>
+<button class="btn btn-primary" id="wrongButton" onclick="registerWrongAndGetNewWord()">Wrong</button>
+<button class="btn btn-primary" id="rightButton" onclick="registerRightAndGetNewWord()">Right</button>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    var wordOutput = @Html.Raw(Json.Serialize(Model));
+
+    var wordPlaceholder = document.getElementById("wordPlaceholder")
+    var wordMeaningPlaceholder = document.getElementById("wordMeaningPlaceholder")
+
+    var submitButton = document.getElementById("submitButton")
+    var wrongButton = document.getElementById("wrongButton")
+    var rightButton = document.getElementById("rightButton")
+
+    submitButton.disabled = false;
+    wrongButton.disabled = true;
+    rightButton.disabled = true;
+
+    if (wordOutput.words.length == 0) {
+        practiceArea.innerText = "No words added";
+    }
+    else {
+        wordPlaceholder.innerText = wordOutput.words[0];
+    }
+
+    var wordIndex = 0;
+    var lastWordCache = "";
+    var wordMeaning = "";
+
+    $.ajax({
+        url: "/GetNextWord",
+        type: "GET",
+        data: { word: wordOutput.words[wordIndex] }
+    }).done(response => {
+        if (response.success) {
+            wordMeaning = response.wordMeaning;
+            lastWordCache = wordOutput.words[wordIndex]
+        }
+        else {
+            wordMeaning = "Unexpected Error Occured";
+            lastWordCache = "";
+        }
+    }).fail(response => {
+        wordMeaning = "Unexpected Error Occured";
+        lastWordCache = "";
+    })
+
+    function submitWord() {
+        async function waitForCondition() {
+            while (lastWordCache !== wordOutput.words[wordIndex]) {
+                console.log("waiting");
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
+            }
+        }
+
+        // Call the function
+        waitForCondition().then(() => {
+            console.log("Condition met!");
+        });
+
+        wordMeaningPlaceholder.innerText = wordMeaning;
+
+        submitButton.disabled = true;
+        wrongButton.disabled = false;
+        rightButton.disabled = false;
+    }
+
+    function registerWrongAndGetNewWord() {
+        wordIndex = wordIndex + 1;
+
+        if (wordIndex == wordOutput.words.length) {
+            completeGame();
+            submitButton.disabled = true;
+            wrongButton.disabled = true;
+            rightButton.disabled = true;
+        }
+        else {
+            wordPlaceholder.innerText = wordOutput.words[wordIndex]
+            wordMeaningPlaceholder.innerText = "";
+
+            $.ajax({
+                url: "/GetNextWord",
+                type: "GET",
+                data: { word: wordOutput.words[wordIndex] }
+            }).done(response => {
+                if (response.success) {
+                    wordMeaning = response.wordMeaning;
+                    lastWordCache = wordOutput.words[wordIndex]
+                }
+                else {
+                    wordMeaning = "Unexpected Error Occured";
+                    lastWordCache = "";
+                }
+            }).fail(response => {
+                wordMeaning = "Unexpected Error Occured";
+                lastWordCache = "";
+            })
+
+            submitButton.disabled = false;
+            wrongButton.disabled = true;
+            rightButton.disabled = true;
+        }
+    }
+
+    function registerRightAndGetNewWord() {
+        wordIndex = wordIndex + 1;
+
+        if (wordIndex == wordOutput.words.length) {
+            completeGame();
+            submitButton.disabled = true;
+            wrongButton.disabled = true;
+            rightButton.disabled = true;
+        }
+        else {
+            wordPlaceholder.innerText = wordOutput.words[wordIndex]
+            wordMeaningPlaceholder.innerText = "";
+
+            $.ajax({
+                url: "/GetNextWord",
+                type: "GET",
+                data: { word: wordOutput.words[wordIndex] }
+            }).done(response => {
+                if (response.success) {
+                    wordMeaning = response.wordMeaning;
+                    lastWordCache = wordOutput.words[wordIndex]
+                }
+                else {
+                    wordMeaning = "Unexpected Error Occured";
+                    lastWordCache = "";
+                }
+            }).fail(response => {
+                wordMeaning = "Unexpected Error Occured";
+                lastWordCache = "";
+            })
+
+            submitButton.disabled = false;
+            wrongButton.disabled = true;
+            rightButton.disabled = true;
+        }
+    }
+
+    function completeGame() {
+        wordPlaceholder.innerText = "";
+        wordMeaningPlaceholder.innerText = "COMPLETED GAME!";
+    }
+</script>

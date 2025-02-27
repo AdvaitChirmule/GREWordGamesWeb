@@ -102,12 +102,11 @@ namespace GREWordGames.Controllers
                 var user = _commonFunctions.ConvertRawDataToList(userDetails);
 
                 var wordSegregated = _practicePageFunctions.SegregateByUserDifficulty(user);
-                List<string> wordOrder = _practicePageFunctions.ReorderWordsBasedOnDifficulty(wordSegregated, 0);
-                List<string> wordMeanings = await _wordMuseAPI.GetUserWordMeanings(wordOrder, token);
+                List<string> wordOrder = _practicePageFunctions.ReorderWordsBasedOnDifficulty(wordSegregated, 0);         
+                
+                var model = new AllWords { words = wordOrder };
 
-                var wordAndWordMeanings = new WordAndWordMeanings { words = wordOrder, wordsMeaning = wordMeanings };
-
-                return View(wordAndWordMeanings);
+                return View(model);
             }
         }
 
@@ -212,6 +211,20 @@ namespace GREWordGames.Controllers
 
             TempData["Message"] = "Successfully added Word to Database";
             return RedirectToAction("MyWords");
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetNextWord(string word)
+        {
+            var token = HttpContext.Session.GetString("token");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                RedirectToAction("Login");
+            }
+            string wordMeaning = await _wordMuseAPI.GetWordMeaning(word, token);
+
+            return Json(new { success = true, wordMeaning = wordMeaning });
         }
     }
 }

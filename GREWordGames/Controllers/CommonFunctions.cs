@@ -14,6 +14,23 @@ namespace GREWordGames.Controllers
             return user;
         }
 
+        public List<string> ConvertStringToList(string str)
+        {
+            List<string> strList = str[1..^1].Split(", ").ToList();
+            return strList;
+        }
+
+        public string ConvertListToString(List<string> strList)
+        {
+            string str = "[";
+            foreach (var item in strList)
+            {
+                str = str + item + ", ";
+            }
+            str = str[0..^2] + "]";
+            return str;
+        }
+
         public bool isNewWord(string proficiency)
         {
             var proficiencyRaw = proficiency[1..^1];
