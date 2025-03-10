@@ -70,6 +70,7 @@
     public class AllWords
     {
         public List<string> words { get; set; }
+        public List<string> outcome { get; set; }
     }
 
     public class WordViewModel

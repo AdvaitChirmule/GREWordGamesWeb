@@ -11,6 +11,7 @@ using FirebaseAdmin.Auth;
 using UserMetadata = GREWordGames.Models.UserMetadata;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
+using System.Numerics;
 
 namespace GREWordGames.Controllers
 
@@ -20,12 +21,14 @@ namespace GREWordGames.Controllers
         private readonly WordMuseAPI _wordMuseAPI;
         private readonly CommonFunctions _commonFunctions;
         private readonly PracticePageFunctions _practicePageFunctions;
+        private AllWords _practiceWordOrder;
 
         public HomeController(ILogger<HomeController> logger)
         {
             _wordMuseAPI = new WordMuseAPI();
             _commonFunctions = new CommonFunctions();
             _practicePageFunctions = new PracticePageFunctions();
+            _practiceWordOrder = new AllWords();
         }
 
         public IActionResult Index(UserAuthenticated userAuthenticated)
@@ -82,34 +85,6 @@ namespace GREWordGames.Controllers
             }
         }
 
-        public async Task<IActionResult> Practice()
-        {
-            var token = HttpContext.Session.GetString("token");
-            if (string.IsNullOrEmpty(token))
-            {
-                return RedirectToAction("Login");
-            }
-            else
-            {
-                var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
-                    new FirebaseOptions
-                    {
-                        AuthTokenAsyncFactory = () => Task.FromResult(token)
-                    });
-
-                var uid = HttpContext.Session.GetString("uid");
-                var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
-                var user = _commonFunctions.ConvertRawDataToList(userDetails);
-
-                var wordSegregated = _practicePageFunctions.SegregateByUserDifficulty(user);
-                List<string> wordOrder = _practicePageFunctions.ReorderWordsBasedOnDifficulty(wordSegregated, 0);         
-                
-                var model = new AllWords { words = wordOrder };
-
-                return View(model);
-            }
-        }
-
         public IActionResult AboutGame()
         {
             return View();
@@ -140,12 +115,6 @@ namespace GREWordGames.Controllers
         public ActionResult GoToMyWords()
         {
             return RedirectToAction("MyWords");
-        }
-
-        [HttpPost]
-        public ActionResult GoToMyPractice()
-        {
-            return RedirectToAction("Practice");
         }
 
         [HttpPost]
@@ -213,6 +182,45 @@ namespace GREWordGames.Controllers
             return RedirectToAction("MyWords");
         }
 
+        public async Task<IActionResult> Practice()
+        {
+            var token = HttpContext.Session.GetString("token");
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login");
+            }
+            else
+            {
+                var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
+                    new FirebaseOptions
+                    {
+                        AuthTokenAsyncFactory = () => Task.FromResult(token)
+                    });
+
+                var uid = HttpContext.Session.GetString("uid");
+                var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
+                var user = _commonFunctions.ConvertRawDataToList(userDetails);
+
+                var wordSegregated = _practicePageFunctions.SegregateByUserDifficulty(user);
+                List<string> wordOrder = _practicePageFunctions.ReorderWordsBasedOnDifficulty(wordSegregated, 0);
+                List<string> wordOutcome = Enumerable.Repeat("0", wordOrder.Count).ToList();
+
+                _practiceWordOrder.words = wordOrder;
+                _practiceWordOrder.outcome = wordOutcome;
+                TempData["WordIndex"] = 0;
+                TempData["RandomOrder"] = _commonFunctions.ConvertListToString(wordOrder);
+                TempData["Proficiency"] = _commonFunctions.ConvertListToString(wordOutcome);
+
+                return View(_practiceWordOrder);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult GoToMyPractice()
+        {
+            return RedirectToAction("Practice");
+        }
+
         [HttpGet]
         public async Task<JsonResult> GetNextWord(string word)
         {
@@ -225,6 +233,71 @@ namespace GREWordGames.Controllers
             string wordMeaning = await _wordMuseAPI.GetWordMeaning(word, token);
 
             return Json(new { success = true, wordMeaning = wordMeaning });
+        }
+
+        [HttpGet]
+        public JsonResult RegisterWrong()
+        {
+            ViewBag.Proficiency = TempData["Proficiency"];
+            ViewBag.WordIndex = TempData["WordIndex"];
+            var proficiencyList = ViewBag.Proficiency;
+            var wordIndex = ViewBag.WordIndex;
+            var practiceOrder = _commonFunctions.ConvertStringToList(proficiencyList);
+            practiceOrder[wordIndex] = "1";
+            wordIndex++;
+            TempData["WordIndex"] = wordIndex;
+            TempData["Proficiency"] = _commonFunctions.ConvertListToString(practiceOrder);
+            return Json(new { success = true });
+        }
+
+        [HttpGet]
+        public JsonResult RegisterRight()
+        {
+            ViewBag.Proficiency = TempData["Proficiency"];
+            ViewBag.WordIndex = TempData["WordIndex"];
+            var proficiencyList = ViewBag.Proficiency;
+            var wordIndex = ViewBag.WordIndex;
+            var practiceOrder = _commonFunctions.ConvertStringToList(proficiencyList);
+            practiceOrder[wordIndex] = "2";
+            wordIndex++;
+            TempData["WordIndex"] = wordIndex;
+            TempData["Proficiency"] = _commonFunctions.ConvertListToString(practiceOrder);
+            return Json(new { success = true });
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> CompleteGame()
+        {
+            var token = HttpContext.Session.GetString("token");
+            if (string.IsNullOrEmpty(token))
+            {
+                return Json(new { success = false });
+            }
+            else
+            {
+                var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
+                    new FirebaseOptions
+                    {
+                        AuthTokenAsyncFactory = () => Task.FromResult(token)
+                    });
+
+                var uid = HttpContext.Session.GetString("uid");
+                var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
+                var user = _commonFunctions.ConvertRawDataToList(userDetails);
+
+                ViewBag.Proficiency = TempData["Proficiency"];
+                ViewBag.Words = TempData["RandomOrder"];
+
+                _practiceWordOrder.words = _commonFunctions.ConvertStringToList(ViewBag.Words);
+                _practiceWordOrder.outcome = _commonFunctions.ConvertStringToList(ViewBag.Proficiency);
+
+                var updatedProficiency = _practicePageFunctions.UpdateWordProficiencies(user, _practiceWordOrder);
+
+                userDetails.proficiency = _commonFunctions.ConvertListToString(updatedProficiency.proficiencyList);
+
+                await firebaseClient.Child("metadata").Child(uid).PutAsync(userDetails);
+                return Json(new { success = true });
+            }
         }
     }
 }

@@ -77,5 +77,21 @@ namespace GREWordGames.Controllers
             proficiency = percentage.ToString("0.00");
             return proficiency;
         }
+
+        public string increaseProficiencyByOne(string proficiency, bool success)
+        {
+            var proficiencyRaw = proficiency[1..^1];
+            var divide = proficiencyRaw.Split("|");
+            var numerator = int.Parse(divide[0]);
+            var denominator = int.Parse(divide[1]);
+            if (success)
+            {
+                numerator++;
+            }
+            denominator++;
+            string newProficiency = '(' + numerator.ToString() + "|" + denominator.ToString() + ")";
+            return newProficiency;
+
+        }
     }
 }

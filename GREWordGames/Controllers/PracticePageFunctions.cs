@@ -1,6 +1,7 @@
 ﻿using GREWordGames.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NuGet.Common;
+using System.Diagnostics;
 
 namespace GREWordGames.Controllers
 {
@@ -77,6 +78,31 @@ namespace GREWordGames.Controllers
                 default:
                     return new List<string>();
             }
+        }
+
+        public UserClass UpdateWordProficiencies(UserClass wordList, AllWords newProficiency)
+        {
+            Dictionary<string, int> originalToRandom = new Dictionary<string, int>();
+
+            for (int i = 0; i < newProficiency.words.Count; i++)
+            {
+                originalToRandom[newProficiency.words[i]] = i;
+            }
+
+            for (int i = 0; i < wordList.wordList.Count; i++)
+            {
+                int newReference = originalToRandom[wordList.wordList[i]];
+                if (newProficiency.outcome[newReference] == "1")
+                {
+                    wordList.proficiencyList[i] = _commonFunctions.increaseProficiencyByOne(wordList.proficiencyList[i], false);
+                }
+                else if (newProficiency.outcome[newReference] == "2")
+                {
+                    wordList.proficiencyList[i] = _commonFunctions.increaseProficiencyByOne(wordList.proficiencyList[i], true);
+                }
+            }
+
+            return wordList;
         }
     }
 }

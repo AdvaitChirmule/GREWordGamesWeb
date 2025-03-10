@@ -25,7 +25,7 @@ namespace GREWordGames.Controllers
             userDetails.words = wordList;
 
             var nowTime = DateTime.UtcNow;
-            var dateAddedList = userDetails.dateAdded.Substring(0, userDetails.dateAdded.Length - 1) + ", " + nowTime.ToString("s") + ".000Z]";
+            var dateAddedList = userDetails.dateAdded.Substring(0, userDetails.dateAdded.Length - 1) + ", " + nowTime.ToString("s") + "]";
             userDetails.dateAdded = dateAddedList;
 
             var proficiencyList = userDetails.proficiency.Substring(0, userDetails.proficiency.Length - 1) + ", (0|0)]";

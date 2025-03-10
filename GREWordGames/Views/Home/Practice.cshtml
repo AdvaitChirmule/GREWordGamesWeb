@@ -11,6 +11,7 @@
 <div id="wordMeaningPlaceholder"></div>
 
 <button class="btn btn-primary" id="submitButton" onclick="submitWord()">Submit</button>
+
 <button class="btn btn-primary" id="wrongButton" onclick="registerWrongAndGetNewWord()">Wrong</button>
 <button class="btn btn-primary" id="rightButton" onclick="registerRightAndGetNewWord()">Right</button>
 
@@ -67,10 +68,7 @@
             }
         }
 
-        // Call the function
-        waitForCondition().then(() => {
-            console.log("Condition met!");
-        });
+        waitForCondition()
 
         wordMeaningPlaceholder.innerText = wordMeaning;
 
@@ -80,26 +78,20 @@
     }
 
     function registerWrongAndGetNewWord() {
+        wrongButton.disabled = true;
+        rightButton.disabled = true;
         wordIndex = wordIndex + 1;
 
         if (wordIndex == wordOutput.words.length) {
-            completeGame();
-            submitButton.disabled = true;
-            wrongButton.disabled = true;
-            rightButton.disabled = true;
-        }
-        else {
-            wordPlaceholder.innerText = wordOutput.words[wordIndex]
-            wordMeaningPlaceholder.innerText = "";
-
             $.ajax({
-                url: "/GetNextWord",
+                url: "/RegisterRight",
                 type: "GET",
-                data: { word: wordOutput.words[wordIndex] }
             }).done(response => {
                 if (response.success) {
-                    wordMeaning = response.wordMeaning;
-                    lastWordCache = wordOutput.words[wordIndex]
+                    completeGame();
+                    submitButton.disabled = true;
+                    wrongButton.disabled = true;
+                    rightButton.disabled = true;
                 }
                 else {
                     wordMeaning = "Unexpected Error Occured";
@@ -109,21 +101,6 @@
                 wordMeaning = "Unexpected Error Occured";
                 lastWordCache = "";
             })
-
-            submitButton.disabled = false;
-            wrongButton.disabled = true;
-            rightButton.disabled = true;
-        }
-    }
-
-    function registerRightAndGetNewWord() {
-        wordIndex = wordIndex + 1;
-
-        if (wordIndex == wordOutput.words.length) {
-            completeGame();
-            submitButton.disabled = true;
-            wrongButton.disabled = true;
-            rightButton.disabled = true;
         }
         else {
             wordPlaceholder.innerText = wordOutput.words[wordIndex]
@@ -137,6 +114,87 @@
                 if (response.success) {
                     wordMeaning = response.wordMeaning;
                     lastWordCache = wordOutput.words[wordIndex]
+
+                    $.ajax({
+                        url: "/RegisterWrong",
+                        type: "GET",
+                    }).done(response => {
+                        if (response.success) {
+                            submitButton.disabled = false;
+                        }
+                        else {
+                            wordMeaning = "Unexpected Error Occured";
+                            lastWordCache = "";
+                        }
+                    }).fail(response => {
+                        wordMeaning = "Unexpected Error Occured";
+                        lastWordCache = "";
+                    })
+                }
+                else {
+                    wordMeaning = "Unexpected Error Occured";
+                    lastWordCache = "";
+                }
+            }).fail(response => {
+                wordMeaning = "Unexpected Error Occured";
+                lastWordCache = "";
+            })
+        }
+    }
+
+    function registerRightAndGetNewWord() {
+        wrongButton.disabled = true;
+        rightButton.disabled = true;
+        wordIndex = wordIndex + 1;
+
+        if (wordIndex == wordOutput.words.length) {
+            $.ajax({
+                url: "/RegisterRight",
+                type: "GET",
+            }).done(response => {
+                if (response.success) {
+                    completeGame();
+                    submitButton.disabled = true;
+                    wrongButton.disabled = true;
+                    rightButton.disabled = true;
+                }
+                else {
+                    wordMeaning = "Unexpected Error Occured";
+                    lastWordCache = "";
+                }
+            }).fail(response => {
+                wordMeaning = "Unexpected Error Occured";
+                lastWordCache = "";
+            })
+        }
+        else {
+            wordPlaceholder.innerText = wordOutput.words[wordIndex]
+            wordMeaningPlaceholder.innerText = "";
+
+            $.ajax({
+                url: "/GetNextWord",
+                type: "GET",
+                data: { word: wordOutput.words[wordIndex] }
+            }).done(response => {
+                if (response.success) {
+                    wordMeaning = response.wordMeaning;
+                    lastWordCache = wordOutput.words[wordIndex]
+
+                    $.ajax({
+                        url: "/RegisterRight",
+                        type: "GET",
+                    }).done(response => {
+                        if (response.success) {
+                            submitButton.disabled = false;
+                        }
+                        else {
+                            wordMeaning = "Unexpected Error Occured";
+                            lastWordCache = "";
+                        }
+                    }).fail(response => {
+                        wordMeaning = "Unexpected Error Occured";
+                        lastWordCache = "";
+                    })
                 }
                 else {
                     wordMeaning = "Unexpected Error Occured";
@@ -156,5 +214,16 @@
     function completeGame() {
         wordPlaceholder.innerText = "";
         wordMeaningPlaceholder.innerText = "COMPLETED GAME!";
+        $.ajax({
+            url: '/CompleteGame',
+            type: 'GET'
+        }).done(response => {
+            if (!response.success) {
+                wordMeaningPlaceholder.innerText = "Unexpected Error occured, couldn't register results";
+            }
+            else {
+                wordMeaningPlaceholder.innerText = "But this is over";
+            }
+        })
     }
 </script>
