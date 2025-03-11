@@ -85,6 +85,92 @@ namespace GREWordGames.Controllers
             }
         }
 
+        [HttpPost]
+        public ActionResult GoToMyWords()
+        {
+            return RedirectToAction("MyWords");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddWordAction(WordViewModel model)
+        {
+            var addWord = model.AddWord;
+            var token = HttpContext.Session.GetString("token");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                RedirectToAction("Login");
+            }
+
+            var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
+                    new FirebaseOptions
+                    {
+                        AuthTokenAsyncFactory = () => Task.FromResult(token)
+                    });
+
+            var uid = HttpContext.Session.GetString("uid");
+            var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
+
+            string wordArrayStr = "[" + string.Join(",", userDetails.words.Trim('[', ']').Split(',').Select(w => $"\"{w.Trim()}\"")) + "]";
+
+            if (wordArrayStr.Contains("\"" + addWord.Word + "\""))
+            {
+                TempData["Message"] = "Word already in the Database";
+                return RedirectToAction("MyWords");
+            }
+
+            var globalDictionaryCheck = await firebaseClient.Child("words").Child(addWord.Word).OnceSingleAsync<WordMetadata>();
+
+            if (globalDictionaryCheck == null)
+            {
+                string addWordMessage = await _wordMuseAPI.SetWordToGlobalDatabase(addWord.Word, token);
+                if (addWordMessage != "Success")
+                {
+                    TempData["Message"] = addWordMessage;
+                    return RedirectToAction("MyWords");
+                }
+            }
+
+            var updatedUserDetails = _wordMuseAPI.AddWordToFirebase(userDetails, addWord.Word);
+
+            await firebaseClient.Child("metadata").Child(uid).PutAsync(updatedUserDetails);
+
+            TempData["Message"] = "Successfully added Word to Database";
+            return RedirectToAction("MyWords");
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> DeleteWord(string id)
+        {
+            var token = HttpContext.Session.GetString("token");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                RedirectToAction("Login");
+            }
+
+            var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
+                    new FirebaseOptions
+                    {
+                        AuthTokenAsyncFactory = () => Task.FromResult(token)
+                    });
+
+            var uid = HttpContext.Session.GetString("uid");
+            var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
+
+            var user = _commonFunctions.ConvertRawDataToList(userDetails);
+
+            var updatedUser = _commonFunctions.DeleteRow(user, int.Parse(id));
+
+            userDetails.words = _commonFunctions.ConvertListToString(updatedUser.wordList);
+            userDetails.proficiency = _commonFunctions.ConvertListToString(updatedUser.proficiencyList);
+            userDetails.dateAdded = _commonFunctions.ConvertListToString(updatedUser.dateAddedList);
+
+            await firebaseClient.Child("metadata").Child(uid).PutAsync(userDetails);
+
+            return Json(new { success = true });
+        }
+
         public IActionResult AboutGame()
         {
             return View();
@@ -112,12 +198,6 @@ namespace GREWordGames.Controllers
         }
 
         [HttpPost]
-        public ActionResult GoToMyWords()
-        {
-            return RedirectToAction("MyWords");
-        }
-
-        [HttpPost]
         public ActionResult GoToAboutGame()
         {
             return RedirectToAction("AboutGame");
@@ -133,53 +213,6 @@ namespace GREWordGames.Controllers
         public ActionResult GoToRegister()
         {
             return RedirectToAction("Register");
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AddWordAction(WordViewModel model)
-        {
-            var addWord = model.AddWord;
-            var token = HttpContext.Session.GetString("token");
-
-            if (string.IsNullOrEmpty(token))
-            {
-                RedirectToAction("Login");
-            }
-
-            var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
-                    new FirebaseOptions
-                    {
-                        AuthTokenAsyncFactory = () => Task.FromResult(token)
-                    });
-
-            var uid = HttpContext.Session.GetString("uid");
-            var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
-
-            string wordArrayStr = "[" + string.Join(",", userDetails.words.Trim('[', ']').Split(',').Select(w => $"\"{w.Trim()}\"")) + "]";
-
-            if (wordArrayStr.Contains("\"" + addWord.Word + "\"")){
-                TempData["Message"] = "Word already in the Database";
-                return RedirectToAction("MyWords");
-            }
-
-            var globalDictionaryCheck = await firebaseClient.Child("words").Child(addWord.Word).OnceSingleAsync<WordMetadata>();
-
-            if (globalDictionaryCheck == null)
-            {
-                string addWordMessage = await _wordMuseAPI.SetWordToGlobalDatabase(addWord.Word, token);
-                if (addWordMessage != "Success")
-                {
-                    TempData["Message"] = addWordMessage;
-                    return RedirectToAction("MyWords");
-                }
-            }
-
-            var updatedUserDetails = _wordMuseAPI.AddWordToFirebase(userDetails, addWord.Word);
-
-            await firebaseClient.Child("metadata").Child(uid).PutAsync(updatedUserDetails);
-
-            TempData["Message"] = "Successfully added Word to Database";
-            return RedirectToAction("MyWords");
         }
 
         public async Task<IActionResult> Practice()

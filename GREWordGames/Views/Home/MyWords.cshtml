@@ -49,6 +49,7 @@
             <th scope="col"><button class="btn btn-primary" onclick="sortByWord()">Words</button></th>
             <th scope="col"><button class="btn btn-primary" onclick="sortByDateAdded()">Date Added</button></th>
             <th scope="col"><button class="btn btn-primary">Proficiency</button></th>
+            <th scope="col">Delete</th>
         </tr>
     </thead>
     <tbody>
@@ -76,8 +77,16 @@
 
     PopulateTable()
 
+    function RefreshTable() {
+        $.ajax({
+            url: "/GoToMyWords",
+            type: "POST"
+        })
+    }
+
     function PopulateTable()
     {
+        var table = document.getElementById("table")
         for (let i = 0; i < wordIndexes[0].length; i++) {
             var row = table.insertRow(i + 1);
 
@@ -85,6 +94,7 @@
             var cell1 = row.insertCell(1);
             var cell2 = row.insertCell(2);
             var cell3 = row.insertCell(3);
+            var cell4 = row.insertCell(4);
 
             cell0.innerHTML = i + 1
             cell1.innerHTML = wordIndexes[1][i]
@@ -103,6 +113,8 @@
             else {
                 cell3.innerHTML = (parseFloat(100 * parseInt(proficiency[0]) / parseInt(proficiency[1])).toFixed(2)).toString() + '%'
             }
+
+            cell4.innerHTML = "<button class='btn btn-primary' onClick='deleteWord(" + i.toString() + ")'>Delete</button>"
         }
     }
 
@@ -116,6 +128,28 @@
         wordIndexes.sort((x, y) => x[0] - y[0]);
         console.log(wordIndexes)
         PopulateTable();
+    }
+
+    function deleteWord(id) {
+
+        var messageBar = document.getElementById("notificationBar")
+        console.log(id);
+
+        $.ajax({
+            url: "/DeleteWord",
+            type: "GET",
+            data: { id: id }
+        }).done(response => {
+            if (response.success) {
+                messageBar.innerHTML = "Deleted Word";
+                window.location.reload(true);6
+            }
+            else {
+                messageBar.innerHTML = "Unexpected Error Occured";
+            }
+        }).fail(response => {
+            messageBar.innerHTML = "Unexpected Error Occured";
+        });
     }
 
 </script>

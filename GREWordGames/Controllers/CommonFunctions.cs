@@ -31,6 +31,15 @@ namespace GREWordGames.Controllers
             return str;
         }
 
+        public UserClass DeleteRow(UserClass user, int id)
+        {
+            user.wordList.RemoveAt(id);
+            user.proficiencyList.RemoveAt(id);
+            user.dateAddedList.RemoveAt(id);
+
+            return user;
+        }
+
         public bool isNewWord(string proficiency)
         {
             var proficiencyRaw = proficiency[1..^1];
