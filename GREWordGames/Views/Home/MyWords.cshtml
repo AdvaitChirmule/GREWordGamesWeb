@@ -86,9 +86,9 @@
 
     function PopulateTable()
     {
-        var table = document.getElementById("table")
+        var table = document.getElementById("table").getElementsByTagName("tbody")[0]
         for (let i = 0; i < wordIndexes[0].length; i++) {
-            var row = table.insertRow(i + 1);
+            var row = table.insertRow(i);
 
             var cell0 = row.insertCell(0);
             var cell1 = row.insertCell(1);
@@ -114,26 +114,28 @@
                 cell3.innerHTML = (parseFloat(100 * parseInt(proficiency[0]) / parseInt(proficiency[1])).toFixed(2)).toString() + '%'
             }
 
-            cell4.innerHTML = "<button class='btn btn-primary' onClick='deleteWord(" + i.toString() + ")'>Delete</button>"
+            cell4.innerHTML = "<button class='btn btn-primary' onClick='deleteWord(" + wordIndexes[0][i].toString() + ")'>Delete</button>"
         }
     }
 
     function sortByWord() {
-        wordIndexes.sort((x, y) => x[1] - y[1]);
-        console.log(wordIndexes)
+        wordIndexes = SortByRow(1, wordIndexes)
+        $("table tbody tr").remove()
+        console.log(wordIndexes);
         PopulateTable();
     }
 
     function sortByDateAdded() {
-        wordIndexes.sort((x, y) => x[0] - y[0]);
         console.log(wordIndexes)
+        wordIndexes = SortByRow(0, wordIndexes)
+        console.log(wordIndexes)
+        $("table tbody tr").remove()
         PopulateTable();
     }
 
     function deleteWord(id) {
 
         var messageBar = document.getElementById("notificationBar")
-        console.log(id);
 
         $.ajax({
             url: "/DeleteWord",
@@ -142,7 +144,7 @@
         }).done(response => {
             if (response.success) {
                 messageBar.innerHTML = "Deleted Word";
-                window.location.reload(true);6
+                window.location.reload(true);
             }
             else {
                 messageBar.innerHTML = "Unexpected Error Occured";

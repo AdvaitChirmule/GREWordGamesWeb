@@ -52,3 +52,21 @@ function HowOld(dateDifference)
 
     return differenceString
 }
+
+function SortByRow(j, wordIndexes) {
+    rowSorted = wordIndexes[j].slice();
+    rowSorted.sort();
+    var rowHash = {}
+    for (let i = 0; i < rowSorted.length; i++) {
+        rowHash[rowSorted[i]] = i
+    }
+    newWordIndexes = [[], [], [], []]
+    for (let i = 0; i < wordIndexes[0].length; i++) {
+        newWordIndexes[0].push(wordIndexes[0][rowHash[wordIndexes[j][i]]])
+        newWordIndexes[1].push(wordIndexes[1][rowHash[wordIndexes[j][i]]])
+        newWordIndexes[2].push(wordIndexes[2][rowHash[wordIndexes[j][i]]])
+        newWordIndexes[3].push(wordIndexes[3][rowHash[wordIndexes[j][i]]])
+    }
+
+    return newWordIndexes;
+}
