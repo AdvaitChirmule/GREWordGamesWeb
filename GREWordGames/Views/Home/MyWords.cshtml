@@ -48,7 +48,7 @@
             <th scope="col"><button class="btn btn-primary" onclick="sortByDateAdded()">Sr No.</button></th>
             <th scope="col"><button class="btn btn-primary" onclick="sortByWord()">Words</button></th>
             <th scope="col"><button class="btn btn-primary" onclick="sortByDateAdded()">Date Added</button></th>
-            <th scope="col"><button class="btn btn-primary">Proficiency</button></th>
+            <th scope="col"><button class="btn btn-primary" onclick="sortByProficiency()">Proficiency</button></th>
             <th scope="col">Delete</th>
         </tr>
     </thead>
@@ -64,18 +64,23 @@
 
     var userMetadataRaw = modelOutput.userMetadata;
 
-    var table = document.getElementById("table")
+    var table = document.getElementById("table");
 
-    var wordIndexes = [[], [], [], []]
+    var wordIndexes = [[], [], [], []];
 
-    wordIndexes[1] = userMetadataRaw.words.slice(1, (userMetadataRaw.words.length) - 1).split(", ")
-    wordIndexes[2] = userMetadataRaw.dateAdded.slice(1, (userMetadataRaw.dateAdded.length) - 1).split(", ")
-    wordIndexes[3] = userMetadataRaw.proficiency.slice(1, (userMetadataRaw.proficiency.length) - 1).split(", ")
-    wordIndexes[0] = Array.from(Array(wordIndexes[1].length).keys())
+    wordIndexes[1] = userMetadataRaw.words.slice(1, (userMetadataRaw.words.length) - 1).split(", ");
+    wordIndexes[2] = userMetadataRaw.dateAdded.slice(1, (userMetadataRaw.dateAdded.length) - 1).split(", ");
+    wordIndexes[3] = userMetadataRaw.proficiency.slice(1, (userMetadataRaw.proficiency.length) - 1).split(", ");
+    wordIndexes[0] = Array.from(Array(wordIndexes[1].length).keys());
+    for (let i = 0; i < wordIndexes[3].length; i++) {
+        wordIndexes[3][i] = ConvertToProficiency(wordIndexes[3][i]);
+    }
 
-    console.log(wordIndexes)
+    var sortedByDateAdded = true;
+    var sortedByWords = false;
+    var sortedByProficiency = false;
 
-    PopulateTable()
+    PopulateTable();
 
     function RefreshTable() {
         $.ajax({
@@ -86,7 +91,7 @@
 
     function PopulateTable()
     {
-        var table = document.getElementById("table").getElementsByTagName("tbody")[0]
+        var table = document.getElementById("table").getElementsByTagName("tbody")[0];
         for (let i = 0; i < wordIndexes[0].length; i++) {
             var row = table.insertRow(i);
 
@@ -96,46 +101,82 @@
             var cell3 = row.insertCell(3);
             var cell4 = row.insertCell(4);
 
-            cell0.innerHTML = i + 1
-            cell1.innerHTML = wordIndexes[1][i]
+            cell0.innerHTML = wordIndexes[0][i] + 1;
+            cell1.innerHTML = wordIndexes[1][i];
 
-            var dateDifferenceMS = Date.now() - Date.parse(wordIndexes[2][i]);
+            var dateDifferenceMS = Date.now() - Date.parse(wordIndexes[2][i] + "Z");
             var dateDifference = new Date(dateDifferenceMS).toISOString();
 
             differenceString = HowOld(dateDifference);
 
             cell2.innerHTML = differenceString;
 
-            proficiency = wordIndexes[3][i].slice(1, wordIndexes[3][i].length - 1).split("|")
-            if (parseInt(proficiency[1]) == 0) {
-                cell3.innerHTML = "0%"
-            }
-            else {
-                cell3.innerHTML = (parseFloat(100 * parseInt(proficiency[0]) / parseInt(proficiency[1])).toFixed(2)).toString() + '%'
-            }
+            cell3.innerHTML = wordIndexes[3][i].toString() + "%";
 
-            cell4.innerHTML = "<button class='btn btn-primary' onClick='deleteWord(" + wordIndexes[0][i].toString() + ")'>Delete</button>"
+            cell4.innerHTML = "<button class='btn btn-primary' onClick='deleteWord(" + wordIndexes[0][i].toString() + ")'>Delete</button>";
         }
     }
 
     function sortByWord() {
-        wordIndexes = SortByRow(1, wordIndexes)
-        $("table tbody tr").remove()
+        var sortReverse = true;
+        var columnToBeSortedBy = 1;
+        if (sortedByWords == true) {
+            sortedByWords = false;
+        }
+        else {
+            sortReverse = false;
+            sortedByWords = true;
+            sortedByDateAdded = false;
+            sortedByProficiency = false;
+        }
+
+        wordIndexes = SortByRow(columnToBeSortedBy, wordIndexes, sortReverse);
         console.log(wordIndexes);
+        $("table tbody tr").remove();
         PopulateTable();
     }
 
     function sortByDateAdded() {
-        console.log(wordIndexes)
-        wordIndexes = SortByRow(0, wordIndexes)
-        console.log(wordIndexes)
-        $("table tbody tr").remove()
+        var sortReverse = true;
+        var columnToBeSortedBy = 0;
+        if (sortedByDateAdded == true) {
+            sortedByDateAdded = false;
+        }
+        else {
+            sortReverse = false;
+            sortedByDateAdded = true;
+            sortedByWords = false;
+            sortedByProficiency = false;
+        }
+
+        wordIndexes = SortByRow(columnToBeSortedBy, wordIndexes, sortReverse);
+        console.log(wordIndexes);
+        $("table tbody tr").remove();
+        PopulateTable();
+    }
+
+    function sortByProficiency() {
+        var sortReverse = true;
+        var columnToBeSortedBy = 3;
+        if (sortedByProficiency == true) {
+            sortedByProficiency = false;
+        }
+        else {
+            sortReverse = false;
+            sortedByProficiency = true;
+            sortedByDateAdded = false;
+            sortedByWords = false;
+        }
+
+        wordIndexes = SortByRow(columnToBeSortedBy, wordIndexes, sortReverse);
+        console.log(wordIndexes);
+        $("table tbody tr").remove();
         PopulateTable();
     }
 
     function deleteWord(id) {
 
-        var messageBar = document.getElementById("notificationBar")
+        var messageBar = document.getElementById("notificationBar");
 
         $.ajax({
             url: "/DeleteWord",

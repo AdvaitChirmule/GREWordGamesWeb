@@ -76,7 +76,7 @@ namespace GREWordGames.Controllers
                     var userCredentials = await _firebaseAuth.CreateUserWithEmailAndPasswordAsync(userDetails.Email, userDetails.Password);
                     if (userCredentials != null)
                     {
-                        return RedirectToAction("MyWords");
+                        return RedirectToAction("Index");
                     }
                     else
                     {
