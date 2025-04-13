@@ -19,12 +19,47 @@ namespace GREWordGames.Controllers
 
         public IActionResult Login()
         {
-            return View();
+            if (TempData["LoginMessage"] != null)
+            {
+                ViewBag.Message = TempData["LoginMessage"];
+            }
+            else
+            {
+                ViewBag.Message = "";
+            }
+
+            var emptyUserDetails = new UserDetails { };
+            var notificationMessage = new Message { NotificationMessage = ViewBag.Message };
+
+            var model = new LoginClass
+            {
+                UserDetails = emptyUserDetails,
+                Message = notificationMessage
+            };
+            return View(model);
         }
 
         public IActionResult Register()
         {
-            return View();
+            if(TempData["RegisterMessage"] != null)
+            {
+                ViewBag.Message = TempData["RegisterMessage"];
+            }
+            else
+            {
+                ViewBag.Message = "";
+            }
+
+            var emptyUserDetails = new UserDetails { };
+            var notificationMessage = new Message { NotificationMessage = ViewBag.Message };
+
+            var model = new LoginClass
+            {
+                UserDetails = emptyUserDetails,
+                Message = notificationMessage
+            };
+
+            return View(model);
         }
 
         public IActionResult SignOutUser()
@@ -35,7 +70,7 @@ namespace GREWordGames.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> LoginAction(UserDetails userDetails, UserMetadata userMetadata)
+        public async Task<ActionResult> LoginAction(UserDetails userDetails)
         {
             string name = userDetails.Name;
             string email = userDetails.Email;
@@ -49,15 +84,18 @@ namespace GREWordGames.Controllers
                     var uid = userCredentials.User.Uid;
                     HttpContext.Session.SetString("token", token);
                     HttpContext.Session.SetString("uid", uid);
+                    TempData["LoginMessage"] = "Logged In Successfully!";
                     return RedirectToAction("MyWords");
                 }
                 else
                 {
+                    TempData["LoginMessage"] = "Username or Password Incorrect";
                     return RedirectToAction("Login");
                 }
             }
             catch (FirebaseAuthException ex)
             {
+                TempData["LoginMessage"] = "Unexpected Server Error encountered";
                 return RedirectToAction("Login");
             }
         }
@@ -67,6 +105,7 @@ namespace GREWordGames.Controllers
         {
             if (userDetails.Password != userDetails.PasswordReentered)
             {
+                TempData["RegisterMessage"] = "Passwords do not match";
                 return RedirectToAction("Register");
             }
             else
@@ -76,16 +115,19 @@ namespace GREWordGames.Controllers
                     var userCredentials = await _firebaseAuth.CreateUserWithEmailAndPasswordAsync(userDetails.Email, userDetails.Password);
                     if (userCredentials != null)
                     {
+                        TempData["RegisterMessage"] = "Registered Successfully!";
                         return RedirectToAction("Index");
                     }
                     else
                     {
+                        TempData["LoginMessage"] = "User already exists. Please Login instead.";
                         return RedirectToAction("Login");
                     }
                 }
                 catch (FirebaseAuthException ex)
                 {
-                    return RedirectToAction("Login");
+                    TempData["RegisterMessage"] = "Unexpected Server Error encountered";
+                    return RedirectToAction("Register");
                 }
 
             }

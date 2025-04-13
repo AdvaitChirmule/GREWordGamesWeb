@@ -16,3 +16,8 @@
 {
     <button class="btn btn-primary" type="submit">MyWords</button>
 }
+
+@using (Html.BeginForm("GoToWaitingRoom", "Home", FormMethod.Post))
+{
+    <button class="btn btn-primary" type="submit">WaitingRoom</button>
+}

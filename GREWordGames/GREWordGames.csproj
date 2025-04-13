@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Compile Remove="Controllers\FirebaseController.cs" />
+    <Compile Remove="Controllers\Room.cs" />
   </ItemGroup>
 
   <ItemGroup>

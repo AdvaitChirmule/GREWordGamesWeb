@@ -19,7 +19,7 @@ namespace GREWordGames.Controllers
             _httpClient = new HttpClient();
         }
 
-        public UserMetadata AddWordToFirebase(UserMetadata userDetails, string word)
+        public async Task<bool> AddWordToFirebase(UserMetadata userDetails, string word, string token, string uid)
         {
             var wordList = userDetails.words.Substring(0, userDetails.words.Length - 1) + ", " + word + "]";
             userDetails.words = wordList;
@@ -33,10 +33,24 @@ namespace GREWordGames.Controllers
 
             userDetails.wordCount = userDetails.wordCount + 1;
 
-            return userDetails;
+            var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
+                    new FirebaseOptions
+                    {
+                        AuthTokenAsyncFactory = () => Task.FromResult(token)
+                    });
+
+            try
+            {
+                await firebaseClient.Child("metadata").Child(uid).PutAsync(userDetails);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
-        public async Task<String> SetWordToGlobalDatabase(string word, string token)
+        public async Task<String> AddWordToGlobalDatabase(string word, string token)
         {
             string wordMuseURL = "https://api.datamuse.com/words?sl=" + word + "&max=10&md=d";
             try

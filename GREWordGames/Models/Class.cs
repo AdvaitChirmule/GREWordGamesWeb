@@ -79,4 +79,24 @@
         public AddWord AddWord { get; set; }
         public Message Message { get; set; }
     }
+
+    public class LoginClass
+    {
+        public UserDetails UserDetails { get; set; }
+        public Message Message { get; set; }
+    }
+
+    public class RoomDetails
+    {
+        public required int GameRoom { get; set; }
+        public string Password { get; set; }
+    }
+
+    public class FirebaseRoomDetails
+    {
+        public bool occupied { get; set; }
+
+        public bool waiting { get; set; }
+        public string password { get; set; }
+    }
 }

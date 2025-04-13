@@ -3,7 +3,7 @@
     ViewData["Title"] = "Register";
 }
 
-@model GREWordGames.Models.UserDetails
+@model LoginClass
 
 <h1>Register</h1>
 
@@ -11,16 +11,18 @@
 {
 
     <label for="Name" class="form-label">Name</label>
-    @Html.TextBoxFor(model => model.Name, new { @class = "form-control", @placeholder = "name" })
+    @Html.TextBoxFor(model => model.UserDetails.Name, new { @class = "form-control", @placeholder = "name" })
 
     <label for="Email" class="form-label">Email Address</label>
-    @Html.TextBoxFor(model => model.Email, new { @type = "email", @class = "form-control", @placeholder = "name@example.com" })
+    @Html.TextBoxFor(model => model.UserDetails.Email, new { @type = "email", @class = "form-control", @placeholder = "name@example.com" })
 
     <label for="Password" class="form-label">Password</label>
-    @Html.TextBoxFor(model => model.Password, new { @type = "password", @class = "form-control" })
+    @Html.TextBoxFor(model => model.UserDetails.Password, new { @type = "password", @class = "form-control" })
 
     <label for="Password" class="form-label">Reenter Password</label>
-    @Html.TextBoxFor(model => model.PasswordReentered, new { @type = "password", @class = "form-control" })
+    @Html.TextBoxFor(model => model.UserDetails.PasswordReentered, new { @type = "password", @class = "form-control" })
+
+    <div id="notificationBar"></div>
 
     <button class="btn btn-primary" type="submit">Register</button>
 }
@@ -29,3 +31,12 @@
 {
     <button class="btn btn-primary" type="submit">Login</button>
 }
+
+<script>
+    var modelOutput = @Html.Raw(Json.Serialize(Model));
+    var message = modelOutput.message.notificationMessage;
+
+    var messageBar = document.getElementById("notificationBar")
+    messageBar.innerHTML = message;
+
+</script>

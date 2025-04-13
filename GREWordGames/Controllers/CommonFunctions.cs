@@ -31,6 +31,20 @@ namespace GREWordGames.Controllers
             return str;
         }
 
+        public bool CheckIfWordInDatabase(string wordList, string word)
+        {
+            string wordArrayStr = "[" + string.Join(",", wordList.Trim('[', ']').Split(',').Select(w => $"\"{w.Trim()}\"")) + "]";
+
+            if (wordArrayStr.Contains("\"" + word + "\""))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public UserClass DeleteRow(UserClass user, int id)
         {
             user.wordList.RemoveAt(id);

@@ -12,6 +12,7 @@ using UserMetadata = GREWordGames.Models.UserMetadata;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Numerics;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace GREWordGames.Controllers
 
@@ -23,12 +24,22 @@ namespace GREWordGames.Controllers
         private readonly PracticePageFunctions _practicePageFunctions;
         private AllWords _practiceWordOrder;
 
+        private string _token;
+        private string _uid;
+
         public HomeController(ILogger<HomeController> logger)
         {
             _wordMuseAPI = new WordMuseAPI();
             _commonFunctions = new CommonFunctions();
             _practicePageFunctions = new PracticePageFunctions();
             _practiceWordOrder = new AllWords();
+        }
+
+        public override void OnActionExecuting(ActionExecutingContext context)
+        {
+            _token = HttpContext.Session.GetString("token");
+            _uid = HttpContext.Session.GetString("uid");
+            base.OnActionExecuting(context);
         }
 
         public IActionResult Index(UserAuthenticated userAuthenticated)
@@ -70,7 +81,7 @@ namespace GREWordGames.Controllers
                 }
                 else
                 {
-                    ViewBag.Message = "nothing rn";
+                    ViewBag.Message = "";
                 }
 
                 var notificationMessage = new Message { NotificationMessage = ViewBag.Message };
@@ -96,9 +107,11 @@ namespace GREWordGames.Controllers
         {
             var addWord = model.AddWord;
             var token = HttpContext.Session.GetString("token");
+            var uid = HttpContext.Session.GetString("uid");
 
-            if (string.IsNullOrEmpty(token))
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(uid))
             {
+                TempData["LoginMessage"] = "Session Expired. Please login again";
                 RedirectToAction("Login");
             }
 
@@ -108,22 +121,19 @@ namespace GREWordGames.Controllers
                         AuthTokenAsyncFactory = () => Task.FromResult(token)
                     });
 
-            var uid = HttpContext.Session.GetString("uid");
             var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
 
-            string wordArrayStr = "[" + string.Join(",", userDetails.words.Trim('[', ']').Split(',').Select(w => $"\"{w.Trim()}\"")) + "]";
-
-            if (wordArrayStr.Contains("\"" + addWord.Word + "\""))
+            if (_commonFunctions.CheckIfWordInDatabase(userDetails.words, addWord.Word) == true)
             {
                 TempData["Message"] = "Word already in the Database";
                 return RedirectToAction("MyWords");
             }
-
+               
             var globalDictionaryCheck = await firebaseClient.Child("words").Child(addWord.Word).OnceSingleAsync<WordMetadata>();
 
             if (globalDictionaryCheck == null)
             {
-                string addWordMessage = await _wordMuseAPI.SetWordToGlobalDatabase(addWord.Word, token);
+                string addWordMessage = await _wordMuseAPI.AddWordToGlobalDatabase(addWord.Word, token);
                 if (addWordMessage != "Success")
                 {
                     TempData["Message"] = addWordMessage;
@@ -131,11 +141,17 @@ namespace GREWordGames.Controllers
                 }
             }
 
-            var updatedUserDetails = _wordMuseAPI.AddWordToFirebase(userDetails, addWord.Word);
+            bool result = await _wordMuseAPI.AddWordToFirebase(userDetails, addWord.Word, token, uid);
 
-            await firebaseClient.Child("metadata").Child(uid).PutAsync(updatedUserDetails);
+            if (result == false)
+            {
+                TempData["Message"] = "Unexpected Error occured";
+            }
+            else
+            {
+                TempData["Message"] = "Successfully added Word to Database";
+            }
 
-            TempData["Message"] = "Successfully added Word to Database";
             return RedirectToAction("MyWords");
         }
 
@@ -331,6 +347,77 @@ namespace GREWordGames.Controllers
                 await firebaseClient.Child("metadata").Child(uid).PutAsync(userDetails);
                 return Json(new { success = true });
             }
+        }
+
+        public IActionResult WaitingRoom()
+        {
+            var token = HttpContext.Session.GetString("token");
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login");
+            }
+            
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult GoToWaitingRoom()
+        {
+            return RedirectToAction("WaitingRoom");
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> SetRoom(string password)
+        {
+            if (string.IsNullOrEmpty(_token) && string.IsNullOrEmpty(_uid))
+            {
+                return Json(new { success = false, message = "Login session expired. Please refresh and login again", roomNumber = -1 });
+            }
+            else
+            {
+                RoomFunctions roomFunctions = new RoomFunctions(password, _token, _uid, HttpContext.Session);
+                if (roomFunctions.RoomAssigned())
+                {
+                    return Json(new { success = true, message = "You have already created a room", roomNumber = roomFunctions.GetRoomNumber() });
+                }
+                else
+                {
+                    await roomFunctions.SetRoomNumber(password);
+                    if (roomFunctions.RoomAssigned())
+                    {
+                        return Json(new { success = true, message = "Found Room!", roomNumber = roomFunctions.GetRoomNumber() });
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "All Rooms Occupied. Please try again later.", roomNumber = -1 });
+                    }
+                }
+            }
+        }
+
+        public async Task<JsonResult> GetRoom(int roomNumber, string password)
+        {
+            if (string.IsNullOrEmpty(_token) && string.IsNullOrEmpty(_uid))
+            {
+                return Json(new { success = false, message = "Login session expired. Please refresh and login again", roomNumber = -1 });
+            }
+            else
+            {
+                RoomFunctions roomFunctions = new RoomFunctions(roomNumber, password, _token, _uid, HttpContext.Session);
+                (bool success, string message) = await roomFunctions.VerifyRoomDetails(roomNumber, password);
+                return Json(new { success = success, message = message });
+            }
+        }
+
+        public IActionResult GameRoom()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult GoToGameRoom()
+        {
+            return RedirectToAction("GameRoom");
         }
     }
 }
