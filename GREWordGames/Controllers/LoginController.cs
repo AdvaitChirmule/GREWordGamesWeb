@@ -66,6 +66,7 @@ namespace GREWordGames.Controllers
         {
             _firebaseAuth.SignOut();
             HttpContext.Session.Remove("token");
+            HttpContext.Session.Remove("uid");
             return RedirectToAction("Index");
         }
 
@@ -82,8 +83,10 @@ namespace GREWordGames.Controllers
                 {
                     var token = await userCredentials.User.GetIdTokenAsync();
                     var uid = userCredentials.User.Uid;
+                    var displayName = userCredentials.User.Info.DisplayName;
                     HttpContext.Session.SetString("token", token);
                     HttpContext.Session.SetString("uid", uid);
+                    HttpContext.Session.SetString("name", displayName);
                     TempData["LoginMessage"] = "Logged In Successfully!";
                     return RedirectToAction("MyWords");
                 }
@@ -108,14 +111,27 @@ namespace GREWordGames.Controllers
                 TempData["RegisterMessage"] = "Passwords do not match";
                 return RedirectToAction("Register");
             }
+            else if (string.IsNullOrEmpty(userDetails.Name))
+            {
+                TempData["RegisterMessage"] = "Name can't be empty";
+                return RedirectToAction("Register");
+            }
             else
             {
                 try
                 {
-                    var userCredentials = await _firebaseAuth.CreateUserWithEmailAndPasswordAsync(userDetails.Email, userDetails.Password);
+                    var userCredentials = await _firebaseAuth.CreateUserWithEmailAndPasswordAsync(userDetails.Email, userDetails.Password, userDetails.Name);
                     if (userCredentials != null)
                     {
                         TempData["RegisterMessage"] = "Registered Successfully!";
+                        var token = await userCredentials.User.GetIdTokenAsync();
+                        var uid = userCredentials.User.Uid;
+                        HttpContext.Session.SetString("token", token);
+                        HttpContext.Session.SetString("uid", uid);
+                        HttpContext.Session.SetString("name", userDetails.Name);
+
+                        FirebaseFunctions _firebaseFunctions = new FirebaseFunctions(token, uid);
+                        await _firebaseFunctions.AddUser(userDetails.Name);
                         return RedirectToAction("Index");
                     }
                     else

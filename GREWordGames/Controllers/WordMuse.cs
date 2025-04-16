@@ -21,17 +21,34 @@ namespace GREWordGames.Controllers
 
         public async Task<bool> AddWordToFirebase(UserMetadata userDetails, string word, string token, string uid)
         {
-            var wordList = userDetails.words.Substring(0, userDetails.words.Length - 1) + ", " + word + "]";
-            userDetails.words = wordList;
+            if (userDetails.words.Length == 2)
+            {
+                var wordList = "[" + word + "]";
+                userDetails.words = wordList;
 
-            var nowTime = DateTime.UtcNow;
-            var dateAddedList = userDetails.dateAdded.Substring(0, userDetails.dateAdded.Length - 1) + ", " + nowTime.ToString("s") + "]";
-            userDetails.dateAdded = dateAddedList;
+                var nowTime = DateTime.UtcNow;
+                var dateAddedList = "[" + nowTime.ToString("s") + "]";
+                userDetails.dateAdded = dateAddedList;
 
-            var proficiencyList = userDetails.proficiency.Substring(0, userDetails.proficiency.Length - 1) + ", (0|0)]";
-            userDetails.proficiency = proficiencyList;
+                var proficiencyList = "[(0|0)]";
+                userDetails.proficiency = proficiencyList;
 
-            userDetails.wordCount = userDetails.wordCount + 1;
+                userDetails.wordCount = userDetails.wordCount + 1;
+            }
+            else
+            {
+                var wordList = userDetails.words.Substring(0, userDetails.words.Length - 1) + ", " + word + "]";
+                userDetails.words = wordList;
+
+                var nowTime = DateTime.UtcNow;
+                var dateAddedList = userDetails.dateAdded.Substring(0, userDetails.dateAdded.Length - 1) + ", " + nowTime.ToString("s") + "]";
+                userDetails.dateAdded = dateAddedList;
+
+                var proficiencyList = userDetails.proficiency.Substring(0, userDetails.proficiency.Length - 1) + ", (0|0)]";
+                userDetails.proficiency = proficiencyList;
+
+                userDetails.wordCount = userDetails.wordCount + 1;
+            }
 
             var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
                     new FirebaseOptions

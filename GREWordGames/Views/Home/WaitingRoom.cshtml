@@ -30,7 +30,7 @@
         var passwordInput = document.getElementById("enterPassword").value;
 
         $.ajax({
-            url: "/SetRoom",
+            url: "/HostRoom",
             type: "GET",
             data: { password: passwordInput }
         }).done(response => {
@@ -52,7 +52,7 @@
         var joinRoomNumber = document.getElementById("joinRoomNumber").value;
 
         $.ajax({
-            url: "/GetRoom",
+            url: "/JoinRoom",
             type: "GET",
             data: { roomNumber: joinRoomNumber, password: joinPassword }
         }).done(response => {

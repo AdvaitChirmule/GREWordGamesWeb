@@ -26,6 +26,7 @@ namespace GREWordGames.Controllers
 
         private string _token;
         private string _uid;
+        private string _name;
 
         public HomeController(ILogger<HomeController> logger)
         {
@@ -39,6 +40,7 @@ namespace GREWordGames.Controllers
         {
             _token = HttpContext.Session.GetString("token");
             _uid = HttpContext.Session.GetString("uid");
+            _name = HttpContext.Session.GetString("name");
             base.OnActionExecuting(context);
         }
 
@@ -47,11 +49,11 @@ namespace GREWordGames.Controllers
             var token = HttpContext.Session.GetString("token");
             if (string.IsNullOrEmpty(token))
             {
-                userAuthenticated.Condition = true;
+                userAuthenticated.Condition = false;
             }
             else
             {
-                userAuthenticated.Condition = false;
+                userAuthenticated.Condition = true;
             }
             return View();
         }
@@ -367,7 +369,7 @@ namespace GREWordGames.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> SetRoom(string password)
+        public async Task<JsonResult> HostRoom(string password)
         {
             if (string.IsNullOrEmpty(_token) && string.IsNullOrEmpty(_uid))
             {
@@ -382,7 +384,7 @@ namespace GREWordGames.Controllers
                 }
                 else
                 {
-                    await roomFunctions.SetRoomNumber(password);
+                    await roomFunctions.SetRoomNumber(password, _name);
                     if (roomFunctions.RoomAssigned())
                     {
                         return Json(new { success = true, message = "Found Room!", roomNumber = roomFunctions.GetRoomNumber() });
@@ -395,7 +397,7 @@ namespace GREWordGames.Controllers
             }
         }
 
-        public async Task<JsonResult> GetRoom(int roomNumber, string password)
+        public async Task<JsonResult> JoinRoom(int roomNumber, string password)
         {
             if (string.IsNullOrEmpty(_token) && string.IsNullOrEmpty(_uid))
             {
@@ -404,7 +406,7 @@ namespace GREWordGames.Controllers
             else
             {
                 RoomFunctions roomFunctions = new RoomFunctions(roomNumber, password, _token, _uid, HttpContext.Session);
-                (bool success, string message) = await roomFunctions.VerifyRoomDetails(roomNumber, password);
+                (bool success, string message) = await roomFunctions.VerifyRoomDetails(roomNumber, password, _name);
                 return Json(new { success = success, message = message });
             }
         }

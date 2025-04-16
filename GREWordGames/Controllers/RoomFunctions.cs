@@ -25,9 +25,9 @@ namespace GREWordGames.Controllers
             _session = session;
         }
 
-        public async Task SetRoomNumber(string password)
+        public async Task SetRoomNumber(string password, string name)
         {
-            RoomNumber = await _firebaseFunctions.GetNextFreeRoom(password);
+            RoomNumber = await _firebaseFunctions.GetNextFreeRoom(password, name);
             _session.SetInt32("roomNumber", RoomNumber);
         }
 
@@ -50,9 +50,9 @@ namespace GREWordGames.Controllers
             return RoomNumber;
         }
 
-        public async Task<(bool, string)> VerifyRoomDetails(int roomNumber, string password)
+        public async Task<(bool, string)> VerifyRoomDetails(int roomNumber, string password, string name2)
         {
-            return await _firebaseFunctions.VerifyCredentials(roomNumber, password);
+            return await _firebaseFunctions.VerifyCredentials(roomNumber, password, name2);
         }
     }
 }

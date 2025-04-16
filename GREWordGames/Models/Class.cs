@@ -23,16 +23,16 @@
 
     public class UserMetadata
     {
-        public string username { get; set; }
-        public int wordCount { get; set; }
-        public string words { get; set; }
-        public string dateAdded { get; set; }
-        public string proficiency { get; set; }
-        public string lastAccessedDevice { get; set; }
-        public bool stateLoggedIn { get; set; }
-        public bool statePlaying { get; set; }
-        public bool stateWaitingRoom { get; set; }
-        public int stateRoomNumber { get; set; }
+        public string username { get; set; } = "";
+        public int wordCount { get; set; } = 0;
+        public string words { get; set; } = "[]";
+        public string dateAdded { get; set; } = "[]";
+        public string proficiency { get; set; } = "[]";
+        public string lastAccessedDevice { get; set; } = "";
+        public bool stateLoggedIn { get; set; } = true;
+        public bool statePlaying { get; set; } = false;
+        public bool stateWaitingRoom { get; set; } = false;
+        public int stateRoomNumber { get; set; } = -1;
     }
 
     public class UserClass
@@ -95,8 +95,10 @@
     public class FirebaseRoomDetails
     {
         public bool occupied { get; set; }
-
-        public bool waiting { get; set; }
+        public bool player2JoinFlag { get; set; }
+        public bool startFlag { get; set; }
         public string password { get; set; }
+        public string player1 { get; set; }
+        public string player2 { get; set; }
     }
 }
