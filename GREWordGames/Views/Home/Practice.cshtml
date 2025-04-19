@@ -84,14 +84,14 @@
 
         if (wordIndex == wordOutput.words.length) {
             $.ajax({
-                url: "/RegisterRight",
+                url: "/RegisterWrong",
                 type: "GET",
             }).done(response => {
                 if (response.success) {
-                    completeGame();
                     submitButton.disabled = true;
                     wrongButton.disabled = true;
                     rightButton.disabled = true;
+                    completeGame();
                 }
                 else {
                     wordMeaning = "Unexpected Error Occured";
@@ -153,10 +153,10 @@
                 type: "GET",
             }).done(response => {
                 if (response.success) {
-                    completeGame();
                     submitButton.disabled = true;
                     wrongButton.disabled = true;
                     rightButton.disabled = true;
+                    completeGame();
                 }
                 else {
                     wordMeaning = "Unexpected Error Occured";

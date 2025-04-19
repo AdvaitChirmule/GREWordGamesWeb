@@ -86,19 +86,21 @@
         public Message Message { get; set; }
     }
 
-    public class RoomDetails
+    public class HostRoomDetails
     {
-        public required int GameRoom { get; set; }
-        public string Password { get; set; }
+        public int Rounds { get; set; } = 5;
     }
 
     public class FirebaseRoomDetails
     {
-        public bool occupied { get; set; }
-        public bool player2JoinFlag { get; set; }
-        public bool startFlag { get; set; }
-        public string password { get; set; }
-        public string player1 { get; set; }
-        public string player2 { get; set; }
+        public bool Occupied { get; set; } = false;
+        public bool Player2JoinFlag { get; set; } = false;
+        public bool StartFlag { get; set; } = false;
+        public string Password { get; set; } = "";
+        public string Player1 { get; set; } = "";
+        public string Player2 { get; set; } = "";
+        public string Player2Uid { get; set; } = "";
+        public int Rounds { get; set; } = 0;
+        public string WordList { get; set; } = "[]";
     }
 }

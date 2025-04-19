@@ -21,7 +21,6 @@ namespace GREWordGames.Controllers
     {
         private readonly WordMuseAPI _wordMuseAPI;
         private readonly CommonFunctions _commonFunctions;
-        private readonly PracticePageFunctions _practicePageFunctions;
         private AllWords _practiceWordOrder;
 
         private string _token;
@@ -32,7 +31,6 @@ namespace GREWordGames.Controllers
         {
             _wordMuseAPI = new WordMuseAPI();
             _commonFunctions = new CommonFunctions();
-            _practicePageFunctions = new PracticePageFunctions();
             _practiceWordOrder = new AllWords();
         }
 
@@ -242,17 +240,9 @@ namespace GREWordGames.Controllers
             }
             else
             {
-                var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
-                    new FirebaseOptions
-                    {
-                        AuthTokenAsyncFactory = () => Task.FromResult(token)
-                    });
+                PracticePageFunctions _practicePageFunctions = new PracticePageFunctions(_token, _uid, HttpContext.Session);
 
-                var uid = HttpContext.Session.GetString("uid");
-                var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
-                var user = _commonFunctions.ConvertRawDataToList(userDetails);
-
-                var wordSegregated = _practicePageFunctions.SegregateByUserDifficulty(user);
+                var wordSegregated = await _practicePageFunctions.SegregateByUserDifficulty();
                 List<string> wordOrder = _practicePageFunctions.ReorderWordsBasedOnDifficulty(wordSegregated, 0);
                 List<string> wordOutcome = Enumerable.Repeat("0", wordOrder.Count).ToList();
 
@@ -326,27 +316,16 @@ namespace GREWordGames.Controllers
             }
             else
             {
-                var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
-                    new FirebaseOptions
-                    {
-                        AuthTokenAsyncFactory = () => Task.FromResult(token)
-                    });
-
-                var uid = HttpContext.Session.GetString("uid");
-                var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
-                var user = _commonFunctions.ConvertRawDataToList(userDetails);
-
                 ViewBag.Proficiency = TempData["Proficiency"];
                 ViewBag.Words = TempData["RandomOrder"];
 
                 _practiceWordOrder.words = _commonFunctions.ConvertStringToList(ViewBag.Words);
                 _practiceWordOrder.outcome = _commonFunctions.ConvertStringToList(ViewBag.Proficiency);
 
-                var updatedProficiency = _practicePageFunctions.UpdateWordProficiencies(user, _practiceWordOrder);
+                PracticePageFunctions _practicePageFunctions = new PracticePageFunctions(_token, _uid, HttpContext.Session);
 
-                userDetails.proficiency = _commonFunctions.ConvertListToString(updatedProficiency.proficiencyList);
+                await _practicePageFunctions.UpdateWordProficiencies(_practiceWordOrder);
 
-                await firebaseClient.Child("metadata").Child(uid).PutAsync(userDetails);
                 return Json(new { success = true });
             }
         }
@@ -369,7 +348,7 @@ namespace GREWordGames.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> HostRoom(string password)
+        public async Task<JsonResult> HostRoom(string password, int wordCount)
         {
             if (string.IsNullOrEmpty(_token) && string.IsNullOrEmpty(_uid))
             {
@@ -397,6 +376,7 @@ namespace GREWordGames.Controllers
             }
         }
 
+        [HttpGet]
         public async Task<JsonResult> JoinRoom(int roomNumber, string password)
         {
             if (string.IsNullOrEmpty(_token) && string.IsNullOrEmpty(_uid))
@@ -411,8 +391,68 @@ namespace GREWordGames.Controllers
             }
         }
 
-        public IActionResult GameRoom()
+        [HttpGet]
+        public async Task<JsonResult> WaitForPlayers(int roomNumber)
         {
+            RoomFunctions roomFunctions = new RoomFunctions(roomNumber, _token, _uid, HttpContext.Session);
+            string name2 = await roomFunctions.WaitForPlayers(roomNumber);
+            if (name2 == "")
+            {
+                await roomFunctions.CloseRoom(roomNumber);
+                return Json(new { success = false, name = "", message = "Closing Room due to no Response" });
+            }
+            else
+            {
+                return Json(new { success = true, name = name2, message = name2 + " joined the Room!" });
+            }
+        }
+
+
+        public async Task<ActionResult> WaitToStart(int roomNumber)
+        {
+            RoomFunctions roomFunctions = new RoomFunctions(_token, _uid, HttpContext.Session);
+            bool success = await roomFunctions.WaitToStart(roomNumber);
+            if (success)
+            {
+                return RedirectToAction("GameRoom");
+            }
+            else
+            {
+                return RedirectToAction("WaitingRoom");
+            }
+
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> StartGame(HostRoomDetails hostRoomDetails)
+        {
+            RoomFunctions roomFunctions = new RoomFunctions(_token, _uid, HttpContext.Session);
+            bool success = await roomFunctions.StartGame(hostRoomDetails.Rounds);
+            if (success)
+            {
+                return RedirectToAction("GameRoom");
+            }
+            else
+            {
+                return RedirectToAction("WaitingRoom");
+
+            }
+        }
+
+        public async Task<IActionResult> GameRoom()
+        {
+            RoomFunctions _roomFunctions = new RoomFunctions(_token, _uid, HttpContext.Session);
+            int roomNumber = _roomFunctions.GetRoomNumber();
+            if (string.IsNullOrEmpty(_token) || string.IsNullOrEmpty(_uid) || roomNumber == -1)
+            {
+                return RedirectToAction("Login");
+            }
+            else
+            {
+                List<string> wordList = await _roomFunctions.GetWordList(roomNumber);
+                Debug.WriteLine(wordList);
+
+            }
             return View();
         }
 

@@ -2,30 +2,50 @@
     ViewData["Title"] = "WaitingRoom";
 }
 
-@model RoomDetails
+@model HostRoomDetails
 
 <h1>Waiting Room</h1>
 
-<label for="joinRoomNumber" class="form-label">Enter Room Number</label>
-<input type="text" class="form-control" id="joinRoomNumber" name="joinRoomNumber" />
+<div>
+    <table>
+        <tr>
+            <td>
+                <label for="enterPassword" class="form-label">Enter Password (optional)</label>
+                <input type="text" id="enterPassword" name="enterPassword" class="form-control" />
 
-<label for="joinPassword" class="form-label">Enter Password (if any)</label>
-<input type="text" class="form-control" id="joinPassword" name="joinPassword" />
+                <button class="btn btn-primary" type="submit" onclick="hostRoom()">Host Room</button>
 
-<button class="btn btn-primary" type="submit" onclick="getRoom()">Join Room</button>
+                <div id="messageBar"></div>
 
-<label for="enterPassword" class="form-label">Enter Password (optional)</label>
-<input type="text" id="enterPassword" name="enterPassword" class="form-control"/>
+                @using (Html.BeginForm("StartGame", "Home", FormMethod.Post))
+                {
+                    <label for="wordLimit" type="form-lavel">Enter Number of Words</label>
+                    @Html.TextBoxFor(model => model.Rounds, new { @class="form-control", @type = "number", @placeholder = "Default: Five Rounds" })
 
-<button class="btn btn-primary" type="submit" onclick="setRoom()">Set Room</button>
+                    <div id="displayStartButton"></div>
+                }
 
-<div id="messageBar"></div>
+            </td>
+            <td>
+                <label for="joinRoomNumber" class="form-label">Enter Room Number</label>
+                <input type="text" class="form-control" id="joinRoomNumber" name="joinRoomNumber" />
+
+                <label for="joinPassword" class="form-label">Enter Password (if any)</label>
+                <input type="text" class="form-control" id="joinPassword" name="joinPassword" />
+
+                <button class="btn btn-primary" type="submit" onclick="joinRoom()">Join Room</button>
+            </td>
+        </tr>
+    </table>
+</div>
+
 <div id="addedRoom"></div>
 
 <script>
-    function setRoom(){
+    function hostRoom(){
         var addRoomDetails = document.getElementById("addedRoom");
         var messageBar = document.getElementById("messageBar");
+        var displayStartButton = document.getElementById("displayStartButton");
 
         var passwordInput = document.getElementById("enterPassword").value;
 
@@ -40,12 +60,15 @@
             }
             messageBar.innerHTML = response.message;
 
+            waitForPlayers(response.roomNumber);
+            displayStartButton.innerHTML = '<button class="btn btn-primary" type="submit" onclick="startGame()" disabled>Start Game</button>';
+
         }).fail(response => {
-            messageBar.innserHTML = "Unexpected Error Occured";
+            messageBar.innerHTML = "Unexpected Error Occured";
         });
     }
 
-    function getRoom() {
+    function joinRoom() {
         var messageBar = document.getElementById("messageBar");
 
         var joinPassword = document.getElementById("joinPassword").value;
@@ -57,14 +80,53 @@
             data: { roomNumber: joinRoomNumber, password: joinPassword }
         }).done(response => {
             if (response.success) {
-                messageBar.innerHTML = "Joined Room";
+                waitToStart(joinRoomNumber)
+            }
+            
+            messageBar.innerHTML = response.message;
+            
+        }).fail(response => {
+            messageBar.innerHTML = "Unexpected Error Occured";
+        });
+    }
+
+    function waitForPlayers(roomNumber) {
+        var messageBar = document.getElementById("messageBar");
+        var displayStartButton = document.getElementById("displayStartButton");
+
+        $.ajax({
+            url: "/WaitForPlayers",
+            type: "GET",
+            data: { roomNumber: roomNumber }
+        }).done(response => {
+            if (response.success) {
+                displayStartButton.innerHTML = '<button class="btn btn-primary" type="submit" onclick="startGame()">Start Game</button>';
+            }
+            messageBar.innerHTML = response.message;
+
+        }).fail(response => {
+            messageBar.innerHTML = "Unexpected Error Occured";
+        });
+    }
+
+    function waitToStart(roomNumber) {
+        var messageBar = document.getElementById("messageBar");
+
+        $.ajax({
+            url: "/WaitToStart",
+            type: "POST",
+            data: { roomNumber: roomNumber }
+        }).done(response => {
+            if (response.success) {
+                messageBar.innerHTML = "Redirecting to Game Room!"
             }
             else {
-                messageBar.innerHTML = response.message;
+                messageBar.innerHTML = "Unexpected Error Occured";
             }
         }).fail(response => {
             messageBar.innerHTML = "Unexpected Error Occured";
         });
     }
+
 </script>
 

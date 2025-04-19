@@ -116,5 +116,52 @@ namespace GREWordGames.Controllers
             return newProficiency;
 
         }
+
+        public List<string> ShuffleAndReturnKWords(List<string> words, int k)
+        {
+            k = Math.Min(k, words.Count);
+
+            HashSet<int> indexSeen = new HashSet<int>();
+            Random random = new Random();
+
+            List<string> result = new List<string>();
+
+            while (indexSeen.Count < k)
+            {
+                int newIndex = random.Next(k);
+                if (indexSeen.Contains(newIndex))
+                {
+                    continue;
+                }
+                else
+                {
+                    indexSeen.Add(newIndex);
+                    result.Add(words[newIndex]);
+                }
+            }
+
+            return result;
+        }
+
+        public List<string> FindCommonWordsForNRounds(List<string> wordListHost, List<string> wordListGuest, int rounds)
+        {
+            HashSet<string> wordSetHost = new HashSet<string>();
+            for (int i = 0;  i < wordListHost.Count; i++)
+            {
+                wordSetHost.Add(wordListHost[i]);
+            }
+
+            List<string> commonWords = new List<string>();
+            for (int i = 0; i < wordListGuest.Count; i++)
+            {
+                if (wordSetHost.Contains(wordListGuest[i]))
+                {
+                    commonWords.Add(wordListGuest[i]);
+                }
+            }
+
+            List<string> commonWordsShuffled = ShuffleAndReturnKWords(commonWords, rounds * 2);
+            return commonWordsShuffled;
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using GREWordGames.Models;
+﻿using Firebase.Database;
+using GREWordGames.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NuGet.Common;
 using System.Diagnostics;
@@ -8,37 +9,51 @@ namespace GREWordGames.Controllers
     public class PracticePageFunctions
     {
         private readonly CommonFunctions _commonFunctions;
-        public PracticePageFunctions()
+        private readonly FirebaseFunctions _firebaseFunctions;
+        private string _token;
+        private string _uid;
+        private ISession _session;
+        public PracticePageFunctions(string token, string uid, ISession session)
         {
+            _token = token;
+            _uid = uid;
+            _session = session;
             _commonFunctions = new CommonFunctions();
+            _firebaseFunctions = new FirebaseFunctions(_token, _uid);
         }
-        public (List<string>, List<string>, List<string>, List<string>) SegregateByUserDifficulty(UserClass user)
+        public async Task<(List<string>, List<string>, List<string>, List<string>)> SegregateByUserDifficulty()
         {
-            List<string> newWords = new List<string>();
-            List<string> difficultWords = new List<string>();
-            List<string> goodWords = new List<string>();
-            List<string> excellentWords = new List<string>();
+            string wordListRaw = await _firebaseFunctions.GetUserWordList();
+            string proficiencyListRaw = await _firebaseFunctions.GetUserProficiencyList();
 
-            for (int i = 0; i < user.proficiencyList.Count; i++)
+            List<string> wordList = _commonFunctions.ConvertStringToList(wordListRaw);
+            List<string> proficiencyList = _commonFunctions.ConvertStringToList(proficiencyListRaw);
+
+            List<string> newWords = [];
+            List<string> difficultWords = [];
+            List<string> goodWords = [];
+            List<string> excellentWords = [];
+
+            for (int i = 0; i < proficiencyList.Count; i++)
             {
-                if (_commonFunctions.isNewWord(user.proficiencyList[i]))
+                if (_commonFunctions.isNewWord(proficiencyList[i]))
                 {
-                    newWords.Add(user.wordList[i]);
+                    newWords.Add(wordList[i]);
                 }
                 else
                 {
-                    float proficiencyPercentage = float.Parse(_commonFunctions.ProficiencyPercentage(user.proficiencyList[i]));
+                    float proficiencyPercentage = float.Parse(_commonFunctions.ProficiencyPercentage(proficiencyList[i]));
                     if (proficiencyPercentage > 75)
                     {
-                        difficultWords.Add(user.wordList[i]);
+                        difficultWords.Add(wordList[i]);
                     }
                     else if (proficiencyPercentage > 50)
                     {
-                        goodWords.Add(user.wordList[i]);
+                        goodWords.Add(wordList[i]);
                     }
                     else
                     {
-                        excellentWords.Add(user.wordList[i]);
+                        excellentWords.Add(wordList[i]);
                     }
                 }
             }
@@ -59,9 +74,9 @@ namespace GREWordGames.Controllers
                         .. wordSegregated.Item4,
                     ];
 
-                    HashSet<int> indexSet = new HashSet<int>();
-                    List<string> consolidatedList = new List<string>();
-                    Random random = new Random();
+                    HashSet<int> indexSet = [];
+                    List<string> consolidatedList = [];
+                    Random random = new();
                     
                     while (indexSet.Count < allWordsList.Count)
                     {
@@ -76,33 +91,42 @@ namespace GREWordGames.Controllers
 
 
                 default:
-                    return new List<string>();
+                    return [];
             }
         }
 
-        public UserClass UpdateWordProficiencies(UserClass wordList, AllWords newProficiency)
+        public async Task UpdateWordProficiencies(AllWords newProficiency)
         {
-            Dictionary<string, int> originalToRandom = new Dictionary<string, int>();
+            UserMetadata userMetadata = await _firebaseFunctions.GetUserDetails();
+
+            List<string> wordList = _commonFunctions.ConvertStringToList(userMetadata.words);
+            List<string> proficiencyList = _commonFunctions.ConvertStringToList(userMetadata.proficiency);
+
+            Dictionary<string, int> originalToRandom = [];
 
             for (int i = 0; i < newProficiency.words.Count; i++)
             {
                 originalToRandom[newProficiency.words[i]] = i;
             }
 
-            for (int i = 0; i < wordList.wordList.Count; i++)
+            for (int i = 0; i < wordList.Count; i++)
             {
-                int newReference = originalToRandom[wordList.wordList[i]];
+                int newReference = originalToRandom[wordList[i]];
                 if (newProficiency.outcome[newReference] == "1")
                 {
-                    wordList.proficiencyList[i] = _commonFunctions.increaseProficiencyByOne(wordList.proficiencyList[i], false);
+                    proficiencyList[i] = _commonFunctions.increaseProficiencyByOne(proficiencyList[i], false);
                 }
                 else if (newProficiency.outcome[newReference] == "2")
                 {
-                    wordList.proficiencyList[i] = _commonFunctions.increaseProficiencyByOne(wordList.proficiencyList[i], true);
+                    proficiencyList[i] = _commonFunctions.increaseProficiencyByOne(proficiencyList[i], true);
                 }
             }
 
-            return wordList;
+            string proficiencyListRaw = _commonFunctions.ConvertListToString(proficiencyList);
+
+            userMetadata.proficiency = proficiencyListRaw;
+
+            await _firebaseFunctions.SetUser(userMetadata);
         }
     }
 }
