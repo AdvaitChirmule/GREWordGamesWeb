@@ -16,8 +16,8 @@
     <link rel="stylesheet" href="~/GREWordGames.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    <header style="height: 60px">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow navbar-color">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">GREWordGames</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -27,19 +27,19 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="MyWords">My Words</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="MyWords">My Words</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Practice">Practice</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Practice">Practice</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="WaitingRoom">Word Game</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="WaitingRoom">Word Game</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="AboutGame">About Game</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="AboutGame">About Game</a>
                         </li>
                     </ul>
                 </div>
@@ -48,10 +48,10 @@
                     <div class="d-flex flex-row-reverse">
                         <ul class="navbar-nav flex-grow-1">
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Welcome @name</a>
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Welcome @name</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="SignOutUser">Sign Out</a>
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="SignOutUser">Sign Out</a>
                             </li>
                         </ul>
                     </div>
@@ -72,10 +72,8 @@
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+	<div class="main-content">
+        @RenderBody()
     </div>
 
     <footer class="border-top footer text-muted">

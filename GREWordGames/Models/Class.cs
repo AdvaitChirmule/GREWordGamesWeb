@@ -102,5 +102,8 @@
         public string Player2Uid { get; set; } = "";
         public int Rounds { get; set; } = 0;
         public string WordList { get; set; } = "[]";
+
+        public int StartTime { get; set; }
+        public bool StartTimeP2Ack { get; set; } = false;
     }
 }

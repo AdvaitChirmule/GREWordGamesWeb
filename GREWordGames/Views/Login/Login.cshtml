@@ -5,42 +5,56 @@
 
 @model LoginClass;
 
-<br /><br />
-<h1>Login</h1>
+<div class="bg-light h-100 d-flex justify-content-center align-items-center">
+	<div class="bg-white w-30 h-95 flex-column align-items-center round-login p-4">
+        <div class="mb-2 d-flex justify-content-center">
+            <img src="~/images/Sign.png" class="login-logo"/>
+        </div>
 
-<br /><br /><br /><br />
+        <div class="mb-3 d-flex justify-content-center w-100 primary-color">
+            <h1>Login</h1>
+        </div>
 
-<br />
+        @using (Html.BeginForm("LoginAction", "Login", FormMethod.Post))
+        {
+            <div class="mb-3">
+                <label for="Email" class="form-label primary-color">Email Address</label>
+                @Html.TextBoxFor(model => model.UserDetails.Email, new { @type = "email", @class = "form-control", @placeholder = "name@example.com" })
+            </div>
 
-@using (Html.BeginForm("LoginAction", "Login", FormMethod.Post))
-{
+            <div class="mb-3">
+                <label for="Password" class="form-label text-justify primary-color">Password</label>
+                @Html.TextBoxFor(model => model.UserDetails.Password, new { @type = "password", @class = "form-control" })
+            </div>
 
-    <label for="Name" class="form-label">Name</label>
-    @Html.TextBoxFor(model => model.UserDetails.Name, new { @class = "form-control", @placeholder = "name" })
+            <div class="mb-3 primary-color" id="notificationBar">
+            </div>
 
-    <label for="Email" class="form-label">Email Address</label>
-    @Html.TextBoxFor(model => model.UserDetails.Email, new { @type = "email", @class = "form-control", @placeholder = "name@example.com" })
+            <div class="mb-3">
+                <button class="btn primary-button w-100" type="submit">Login</button>
+            </div>
+        }
 
-    <label for="Password" class="form-label">Password</label>
-    @Html.TextBoxFor(model => model.UserDetails.Password, new { @type = "password", @class = "form-control" })
+        <div class="mb-3 d-flex justify-content-center w-100">
+            <span class="primary-color">or</span>
+        </div>
 
-    <div id="notificationBar"></div>
+        <div class="mb-3">
+            @using (Html.BeginForm("GoToRegister", "Login", FormMethod.Post))
+            {
+                <button class="btn secondary-button w-100" type="submit">Create an Account</button>
+            }
+        </div>
 
-    <button class="btn btn-primary" type="submit">Login</button>
-}
+        <script>
+            var modelOutput = @Html.Raw(Json.Serialize(Model));
+            var message = modelOutput.message.notificationMessage;
 
-@using (Html.BeginForm("GoToRegister", "Login", FormMethod.Post))
-{
-    <label for="RegisterText" class="form-label">Or Create an Account</label>
-    <br />
-    <button class="btn btn-primary" type="submit">Register</button>
-}
+            var messageBar = document.getElementById("notificationBar");
+            messageBar.innerHTML = message;
 
-<script>
-    var modelOutput = @Html.Raw(Json.Serialize(Model));
-    var message = modelOutput.message.notificationMessage;
+        </script>
+    </div>
 
-    var messageBar = document.getElementById("notificationBar")
-    messageBar.innerHTML = message;
 
-</script>
+</div>

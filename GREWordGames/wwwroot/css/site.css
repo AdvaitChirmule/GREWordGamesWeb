@@ -15,8 +15,75 @@ html {
 html {
   position: relative;
   min-height: 100%;
+  min-width: 100%;
+  height: 100vh;
+  width: 100vh;
 }
 
 body {
-  margin-bottom: 60px;
+    height: 100%;
+    width: 100%;
+    min-height: 100%;
+    min-width: 100%;
 }
+
+.w-30 {
+    width: 30% !important;
+}
+
+.h-95 {
+    height: 95% !important;
+}
+
+.login-logo{
+    width: 35%;
+}
+
+.primary-color {
+    color: #3E2A5D;
+}
+
+.secondary-color {
+    color: #F5C518;
+}
+
+.tertiary-color {
+    color: #5A3E7A;
+}
+
+.supporting-color {
+    color: #C4A000;
+}
+
+.primary-button {
+    background-color: #3E2A5D;
+    color: #F5C518;
+}
+
+.primary-button:hover {
+    color: #C4A000;
+}
+
+.secondary-button {
+    background-color: white;
+    border-color: #3E2A5D;
+    color: #3E2A5D;
+}
+
+.secondary-button:hover{
+    background-color: #3E2A5D;
+    color: #F5C518;
+}
+
+.round-login{
+    border-radius: 15px;
+}
+
+.navbar-color {
+    background-color: #3E2A5D;
+}
+
+.nav-link, .navbar-brand, a {
+    color: #F5C518 !important;
+}
+
