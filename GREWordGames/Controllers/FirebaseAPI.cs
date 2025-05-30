@@ -8,14 +8,14 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace GREWordGames.Controllers
 {
-    public class FirebaseFunctions
+    public class FirebaseAPI
     {
         private readonly HttpClient _httpClient;
         private string _token;
         private string _uid;
         private FirebaseClient _firebaseClient;
 
-        public FirebaseFunctions(string token, string uid)
+        public FirebaseAPI(string token, string uid)
         {
             _httpClient = new HttpClient();
             _token = token;

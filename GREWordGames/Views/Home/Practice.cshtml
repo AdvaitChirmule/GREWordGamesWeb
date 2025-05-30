@@ -7,13 +7,27 @@
 
 <h1>Practice</h1>
 
-<div id="wordPlaceholder"></div>
-<div id="wordMeaningPlaceholder"></div>
-
-<button class="btn btn-primary" id="submitButton" onclick="submitWord()">Submit</button>
-
-<button class="btn btn-primary" id="wrongButton" onclick="registerWrongAndGetNewWord()">Wrong</button>
-<button class="btn btn-primary" id="rightButton" onclick="registerRightAndGetNewWord()">Right</button>
+<div class="container">
+    <div class="row">
+        <div class="flipCard">
+            <div class="flipCardInner" id="cardFlip">
+                <div class="flipCardFront">
+                    <button class="btn secondary-button h-100 w-100" id="wordPlaceholder" onclick="submitWord()">Submit</button>
+                </div>
+                <div class="flipCardBack white-background" id="wordMeaningPlaceholder">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm">
+            <button class="btn btn-primary" id="wrongButton" onclick="registerWrongAndGetNewWord()"><img src="~/images/Wrong.png" class="fit-image"/></button>
+        </div>
+        <div class="col-sm">
+            <button class="btn btn-primary" id="rightButton" onclick="registerRightAndGetNewWord()"><img src="~/images/Right.png" class="fit-image" /></button>
+        </div>
+    </div>
+</div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -23,7 +37,7 @@
     var wordPlaceholder = document.getElementById("wordPlaceholder")
     var wordMeaningPlaceholder = document.getElementById("wordMeaningPlaceholder")
 
-    var submitButton = document.getElementById("submitButton")
+    var submitButton = document.getElementById("wordPlaceholder")
     var wrongButton = document.getElementById("wrongButton")
     var rightButton = document.getElementById("rightButton")
 
@@ -69,6 +83,9 @@
         }
 
         waitForCondition()
+
+        var card = document.getElementById("cardFlip")
+        card.classList.toggle("flipped");
 
         wordMeaningPlaceholder.innerText = wordMeaning;
 
@@ -140,6 +157,9 @@
                 lastWordCache = "";
             })
         }
+
+        var card = document.getElementById("cardFlip")
+        card.classList.toggle("flipped");
     }
 
     function registerRightAndGetNewWord() {
@@ -209,6 +229,9 @@
             wrongButton.disabled = true;
             rightButton.disabled = true;
         }
+
+        var card = document.getElementById("cardFlip")
+        card.classList.toggle("flipped");
     }
 
     function completeGame() {

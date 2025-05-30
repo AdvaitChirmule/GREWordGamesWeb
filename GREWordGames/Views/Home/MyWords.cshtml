@@ -4,32 +4,116 @@
 
 @model WordViewModel
 
-<h1>@ViewData["Title"]</h1>
+<div class="w-100 h-100 d-flex justify-content-center bg-light p-3">
+    <div class="w-75">
+        <!--
+        <div class="round-login bg-white mb-3 p-3">
+            <div class="container bg-white round-login h-15 w-100">
+                <div class="row">
+                    <div class="col-sm-4 bg-white">
+                        <div class="container">
+                            <div class="row container both">
+                                <div class="col-sm-4">
+                                    📒
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="container">
+                                        <div class="row" id="wordCount">
+                                        </div>
+                                        <div class="row">
+                                            Words
+                                        </div>
+                                        <div class="row">
+                                            ⬆ beating 43% of people
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 bg-white">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    📆
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="container">
+                                        <div class="row" id="wordCount">
+                                        </div>
+                                        <div class="row">
+                                            Words
+                                        </div>
+                                        <div class="row">
+                                            ⬆ beating 43% of people
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 bg-white">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-sm-4 mb-3 d-flex justify-content-center">
+                                    <img class="img-fluid rounded-circle" src="~/images/Words.png" />
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="container">
+                                        <div class="row" id="wordCount">
+                                        </div>
+                                        <div class="row">
+                                            Words
+                                        </div>
+                                        <div class="row">
+                                            ⬆ beating 43% of people
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        -->
+        <div class="round-login bg-white mb-3 p-3">
+            <table class="table" id="table">
+                <thead>
+                    <tr style="min-width: 50px">
+                        @using (Html.BeginForm("AddWordAction", "Home", FormMethod.Post))
+                        {
+                            {
+                                <th colspan="4" class="p-0">
+                                    @Html.TextBoxFor(model => model.AddWord.Word, new { @class = "form-control", @placeholder = "Search or Add Word" })
+                                </th>
+                                <th colspan="1" class="p-0">
+                                    <button class="btn primary-button w-100" type="submit">Add Word</button>
+                                </th>
+                            }
+                        }
+                    </tr>
+                    <tr style="width: 30px">
+                        <th colspan="5" class="p-0">
+                            <div id="notificationBar"></div>
+                        </th>
+                    </tr>
+                    <tr class="primary-background">
+                        <th class="t-col-1"><button class="btn primary-button" onclick="sortByDateAdded()">Sr No.</button></th>
+                        <th class="t-col-4"><button class="btn primary-button" onclick="sortByWord()">Words</button></th>
+                        <th class="t-col-2"><button class="btn primary-button" onclick="sortByDateAdded()">Date Added</button></th>
+                        <th class="t-col-2"><button class="btn primary-button" onclick="sortByProficiency()">Proficiency</button></th>
+                        <th class="t-col-1 primary-background">Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-@using (Html.BeginForm("GoToHome", "Home", FormMethod.Post))
-{{
-    <button class="btn btn-primary" type="submit">Home</button>
-}}
-
-@using (Html.BeginForm("GoToLogin", "Home", FormMethod.Post))
-{{
-    <button class="btn btn-primary" type="submit">Login</button>
-}}
-
-@using (Html.BeginForm("GoToRegister", "Home", FormMethod.Post))
-{{
-    <button class="btn btn-primary" type="submit">Register</button>
-}}
-
-@using (Html.BeginForm("AddWordAction", "Home", FormMethod.Post))
-{{
-    <label for="Name" class="form-label">Add Word</label>
-    @Html.TextBoxFor(model => model.AddWord.Word, new { @class = "form-control", @placeholder = "Add A Word" })
-
-    <button class="btn btn-primary" type="submit">Add Word</button>
-}}
-
-<div id="notificationBar"></div>
+<script type="text/javascript" src="~/js/Scripts/programs.js"></script>
 
 <script>
     var modelOutput = @Html.Raw(Json.Serialize(Model));
@@ -40,27 +124,18 @@
 
 </script>
 
-<table class="table" id="table">
-    <thead>
-        <tr>
-            <th scope="col"><button class="btn btn-primary" onclick="sortByDateAdded()">Sr No.</button></th>
-            <th scope="col"><button class="btn btn-primary" onclick="sortByWord()">Words</button></th>
-            <th scope="col"><button class="btn btn-primary" onclick="sortByDateAdded()">Date Added</button></th>
-            <th scope="col"><button class="btn btn-primary" onclick="sortByProficiency()">Proficiency</button></th>
-            <th scope="col">Delete</th>
-        </tr>
-    </thead>
-    <tbody>
-        
-    </tbody>
-</table>
-
-<script type="text/javascript" src="~/js/Scripts/programs.js"></script>
-
 <script>
     var modelOutput = @Html.Raw(Json.Serialize(Model));
 
     var userMetadataRaw = modelOutput.userMetadata;
+
+    //var wordCount = document.getElementById("wordCount");
+    //var wordCountLastWeek = document.getElementById("wordCountLastWeek");
+    //var proficiencyLastWeek = document.getElementById("proficiencyLastWeek");
+
+    //wordCount.innerText = userMetadataRaw.words.length.toString();
+    //wordCountLastWeek.innerText = userMetadataRaw.words.length.toString();
+    //proficiencyLastWeek.innerText = "0%";
 
     var table = document.getElementById("table");
 
@@ -111,7 +186,7 @@
 
             cell3.innerHTML = wordIndexes[3][i].toString() + "%";
 
-            cell4.innerHTML = "<button class='btn btn-primary' onClick='deleteWord(" + wordIndexes[0][i].toString() + ")'>Delete</button>";
+            cell4.innerHTML = "<button class='btn secondary-button' onClick='deleteWord(" + wordIndexes[0][i].toString() + ")'>Delete</button>";
         }
     }
 

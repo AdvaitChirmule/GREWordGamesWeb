@@ -5,38 +5,91 @@
 
 @model LoginClass
 
-<h1>Register</h1>
+<div class="bg-light h-100 d-flex justify-content-center align-items-center">
+    <div class="bg-white w-60 h-95 flex-column align-items-center round-login p-4">
+        <div class="mb-2 d-flex justify-content-center">
+            <img src="~/images/Sign.png" class="login-logo-small" />
+        </div>
 
-@using (Html.BeginForm("RegisterAction", "Login", FormMethod.Post))
-{
+        <div class="mb-3 d-flex justify-content-center w-100 primary-color">
+            <h1>Register</h1>
+        </div>
 
-    <label for="Name" class="form-label">Name</label>
-    @Html.TextBoxFor(model => model.UserDetails.Name, new { @class = "form-control", @placeholder = "name" })
+        
+        <div class="container">
+            @using (Html.BeginForm("RegisterAction", "Login", FormMethod.Post))
+            {
+                <div class="row">
+                    <div class="col-sm">
+                        <div class="mb-3">
+                            <label for="Name" class="form-label">Username</label>
+                            @Html.TextBoxFor(model => model.UserDetails.Name, new { @class = "form-control", @placeholder = "Username" })
+                        </div>
+                    </div>
+                    <div class="col-sm">
+                        <div class="mb-3">
+                            <label for="Email" class="form-label">Email Address</label>
+                            @Html.TextBoxFor(model => model.UserDetails.Email, new { @type = "email", @class = "form-control", @placeholder = "name@example.com" })
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <div class="mb-3">
+                            <label for="Password" class="form-label">Password</label>
+                            @Html.TextBoxFor(model => model.UserDetails.Password, new { @type = "password", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="col-sm">
+                        <div class="mb-3">
+                            <label for="Password" class="form-label">Reenter Password</label>
+                            @Html.TextBoxFor(model => model.UserDetails.PasswordReentered, new { @type = "password", @class = "form-control" })
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <div class="mb-3 primary-color" id="notificationBar">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <div class="mb-3">
+                            <div class="mb-3">
+                                <button class="btn primary-button w-100" type="submit">Register</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="row">
+                <div class="col-sm">
+                    <div class="mb-3 d-flex justify-content-center w-100">
+                        <span class="primary-color">or</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm">
+                    <div class="mb-3">
+                        @using (Html.BeginForm("GoToLogin", "Login", FormMethod.Post))
+                        {
+                            <button class="btn secondary-button w-100" type="submit">Login to an Existing Account</button>
+                        }
+                    </div>
+                </div>
+            </div>    
+        </div>
+        
 
-    <label for="Email" class="form-label">Email Address</label>
-    @Html.TextBoxFor(model => model.UserDetails.Email, new { @type = "email", @class = "form-control", @placeholder = "name@example.com" })
+        <script>
+            var modelOutput = @Html.Raw(Json.Serialize(Model));
+            var message = modelOutput.message.notificationMessage;
 
-    <label for="Password" class="form-label">Password</label>
-    @Html.TextBoxFor(model => model.UserDetails.Password, new { @type = "password", @class = "form-control" })
+            var messageBar = document.getElementById("notificationBar")
+            messageBar.innerHTML = message;
 
-    <label for="Password" class="form-label">Reenter Password</label>
-    @Html.TextBoxFor(model => model.UserDetails.PasswordReentered, new { @type = "password", @class = "form-control" })
-
-    <div id="notificationBar"></div>
-
-    <button class="btn btn-primary" type="submit">Register</button>
-}
-
-@using (Html.BeginForm("GoToLogin", "Home", FormMethod.Post))
-{
-    <button class="btn btn-primary" type="submit">Login</button>
-}
-
-<script>
-    var modelOutput = @Html.Raw(Json.Serialize(Model));
-    var message = modelOutput.message.notificationMessage;
-
-    var messageBar = document.getElementById("notificationBar")
-    messageBar.innerHTML = message;
-
-</script>
+        </script>
+    </div>
+</div>

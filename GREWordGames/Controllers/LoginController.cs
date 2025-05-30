@@ -4,6 +4,9 @@ using GREWordGames.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Diagnostics;
+using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
+using FirebaseAdmin.Auth;
 
 
 namespace GREWordGames.Controllers
@@ -11,6 +14,8 @@ namespace GREWordGames.Controllers
 	public class LoginController : Controller
 	{
         private readonly FirebaseAuthClient _firebaseAuth;
+        private readonly LoginFunctions _loginFunctions;
+        private FirebaseAPI _firebaseAPI;
 
         public LoginController(FirebaseAuthClient firebaseAuth)
         {
@@ -19,45 +24,20 @@ namespace GREWordGames.Controllers
 
         public IActionResult Login()
         {
-            if (TempData["LoginMessage"] != null)
-            {
-                ViewBag.Message = TempData["LoginMessage"];
-            }
-            else
-            {
-                ViewBag.Message = "";
-            }
+            LoginFunctions _loginFunctions = new LoginFunctions(_firebaseAuth, HttpContext.Session);
 
-            var emptyUserDetails = new UserDetails { };
-            var notificationMessage = new Message { NotificationMessage = ViewBag.Message };
+            var existingNotifications = _loginFunctions.CheckMessages(TempData["LoginMessage"]);
+            var model = _loginFunctions.PrepareModel(existingNotifications);
 
-            var model = new LoginClass
-            {
-                UserDetails = emptyUserDetails,
-                Message = notificationMessage
-            };
             return View(model);
         }
 
         public IActionResult Register()
         {
-            if(TempData["RegisterMessage"] != null)
-            {
-                ViewBag.Message = TempData["RegisterMessage"];
-            }
-            else
-            {
-                ViewBag.Message = "";
-            }
+            LoginFunctions _loginFunctions = new LoginFunctions(_firebaseAuth, HttpContext.Session);
 
-            var emptyUserDetails = new UserDetails { };
-            var notificationMessage = new Message { NotificationMessage = ViewBag.Message };
-
-            var model = new LoginClass
-            {
-                UserDetails = emptyUserDetails,
-                Message = notificationMessage
-            };
+            var existingNotifications = _loginFunctions.CheckMessages(TempData["RegisterMessage"]);
+            var model = _loginFunctions.PrepareModel(existingNotifications);
 
             return View(model);
         }
@@ -71,81 +51,71 @@ namespace GREWordGames.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> LoginAction(UserDetails userDetails)
+        public async Task<IActionResult> LoginAction(UserDetails userDetails)
         {
-            string name = userDetails.Name;
-            string email = userDetails.Email;
-            string password = userDetails.Password;
-            try
-            {
-                var userCredentials = await _firebaseAuth.SignInWithEmailAndPasswordAsync(email, password);
-                if (userCredentials != null)
-                {
-                    var token = await userCredentials.User.GetIdTokenAsync();
-                    var uid = userCredentials.User.Uid;
-                    var displayName = userCredentials.User.Info.DisplayName;
-                    HttpContext.Session.SetString("token", token);
-                    HttpContext.Session.SetString("uid", uid);
-                    HttpContext.Session.SetString("name", displayName);
-                    TempData["LoginMessage"] = "Logged In Successfully!";
-                    return RedirectToAction("MyWords");
-                }
-                else
-                {
-                    TempData["LoginMessage"] = "Username or Password Incorrect";
-                    return RedirectToAction("Login");
-                }
-            }
-            catch (FirebaseAuthException ex)
-            {
-                TempData["LoginMessage"] = "Unexpected Server Error encountered";
-                return RedirectToAction("Login");
-            }
-        }
+            LoginFunctions _loginFunctions = new LoginFunctions(_firebaseAuth, HttpContext.Session);
 
-        [HttpPost]
-        public async Task<ActionResult> RegisterAction(UserDetails userDetails)
-        {
-            if (userDetails.Password != userDetails.PasswordReentered)
+            bool emailCheck = _loginFunctions.CheckEmailNotEmpty(userDetails.Email);
+            if (!emailCheck)
             {
-                TempData["RegisterMessage"] = "Passwords do not match";
-                return RedirectToAction("Register");
+                var model = _loginFunctions.PrepareModel("Email Not Entered");
+                return View("Login", model);
             }
-            else if (string.IsNullOrEmpty(userDetails.Name))
+
+            bool passwordCheck = _loginFunctions.CheckPasswordNotEmpty(userDetails.Password);
+            if (!passwordCheck)
             {
-                TempData["RegisterMessage"] = "Name can't be empty";
-                return RedirectToAction("Register");
+                var model = _loginFunctions.PrepareModel("Password Not Entered");
+                return View("Login", model);
+            }
+
+            bool loginSuccess = await _loginFunctions.VerifyLoginDetails(userDetails.Email, userDetails.Password);
+            if (!loginSuccess)
+            {
+                var model = _loginFunctions.PrepareModel("Incorrect Credentials or Server Error");
+                return View("Login", model);
             }
             else
             {
-                try
-                {
-                    var userCredentials = await _firebaseAuth.CreateUserWithEmailAndPasswordAsync(userDetails.Email, userDetails.Password, userDetails.Name);
-                    if (userCredentials != null)
-                    {
-                        TempData["RegisterMessage"] = "Registered Successfully!";
-                        var token = await userCredentials.User.GetIdTokenAsync();
-                        var uid = userCredentials.User.Uid;
-                        HttpContext.Session.SetString("token", token);
-                        HttpContext.Session.SetString("uid", uid);
-                        HttpContext.Session.SetString("name", userDetails.Name);
+                return RedirectToAction("MyWords");
+            }          
+        }
 
-                        FirebaseFunctions _firebaseFunctions = new FirebaseFunctions(token, uid);
-                        await _firebaseFunctions.AddUser(userDetails.Name);
-                        return RedirectToAction("Index");
-                    }
-                    else
-                    {
-                        TempData["LoginMessage"] = "User already exists. Please Login instead.";
-                        return RedirectToAction("Login");
-                    }
-                }
-                catch (FirebaseAuthException ex)
-                {
-                    TempData["RegisterMessage"] = "Unexpected Server Error encountered";
-                    return RedirectToAction("Register");
-                }
+        [HttpPost]
+        public async Task<IActionResult> RegisterAction(UserDetails userDetails)
+        {
+            LoginFunctions _loginFunctions = new LoginFunctions(_firebaseAuth, HttpContext.Session);
 
+            bool emailCheck = _loginFunctions.CheckEmailNotEmpty(userDetails.Email);
+            if (!emailCheck)
+            {
+                var model = _loginFunctions.PrepareModel("Email Not Entered");
+                return View("Register", model);
+            }
+
+            bool passwordCheck = _loginFunctions.CheckPasswordNotEmpty(userDetails.Password) || _loginFunctions.CheckPasswordNotEmpty(userDetails.PasswordReentered);
+            if (!passwordCheck)
+            {
+                var model = _loginFunctions.PrepareModel("Password Not Entered");
+                return View("Register", model);
+            }
+
+            bool bothPasswordSameCheck = _loginFunctions.CheckBothPasswordsSame(userDetails.Password, userDetails.PasswordReentered);
+            if (!bothPasswordSameCheck)
+            {
+                var model = _loginFunctions.PrepareModel("Passwords Do Not Match");
+                return View("Register", model);
+            }
+
+            bool registerSuccess = await _loginFunctions.RegisterUser(userDetails);
+            if (!registerSuccess)
+            {
+                var model = _loginFunctions.PrepareModel("User Already Exists. Please Login instead");
+                return View("Login", model);
+            }
+            else
+            {
+                return RedirectToAction("Index");
             }
         }
 

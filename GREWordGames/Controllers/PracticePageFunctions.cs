@@ -9,7 +9,7 @@ namespace GREWordGames.Controllers
     public class PracticePageFunctions
     {
         private readonly CommonFunctions _commonFunctions;
-        private readonly FirebaseFunctions _firebaseFunctions;
+        private readonly FirebaseAPI _firebaseAPI;
         private string _token;
         private string _uid;
         private ISession _session;
@@ -19,12 +19,12 @@ namespace GREWordGames.Controllers
             _uid = uid;
             _session = session;
             _commonFunctions = new CommonFunctions();
-            _firebaseFunctions = new FirebaseFunctions(_token, _uid);
+            _firebaseAPI = new FirebaseAPI(_token, _uid);
         }
         public async Task<(List<string>, List<string>, List<string>, List<string>)> SegregateByUserDifficulty()
         {
-            string wordListRaw = await _firebaseFunctions.GetUserWordList();
-            string proficiencyListRaw = await _firebaseFunctions.GetUserProficiencyList();
+            string wordListRaw = await _firebaseAPI.GetUserWordList();
+            string proficiencyListRaw = await _firebaseAPI.GetUserProficiencyList();
 
             List<string> wordList = _commonFunctions.ConvertStringToList(wordListRaw);
             List<string> proficiencyList = _commonFunctions.ConvertStringToList(proficiencyListRaw);
@@ -97,7 +97,7 @@ namespace GREWordGames.Controllers
 
         public async Task UpdateWordProficiencies(AllWords newProficiency)
         {
-            UserMetadata userMetadata = await _firebaseFunctions.GetUserDetails();
+            UserMetadata userMetadata = await _firebaseAPI.GetUserDetails();
 
             List<string> wordList = _commonFunctions.ConvertStringToList(userMetadata.words);
             List<string> proficiencyList = _commonFunctions.ConvertStringToList(userMetadata.proficiency);
@@ -126,7 +126,7 @@ namespace GREWordGames.Controllers
 
             userMetadata.proficiency = proficiencyListRaw;
 
-            await _firebaseFunctions.SetUser(userMetadata);
+            await _firebaseAPI.SetUser(userMetadata);
         }
     }
 }
