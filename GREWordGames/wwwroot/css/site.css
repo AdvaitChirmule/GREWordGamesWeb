@@ -27,16 +27,32 @@ body {
     min-width: 100%;
 }
 
-.h-15{
-    height: 15% !important;
-}
-
 .w-30 {
     width: 30% !important;
 }
 
 .w-60 {
     width: 60% !important;
+}
+
+.h-10{
+    height: 10%;
+}
+
+.h-15 {
+    height: 15% !important;
+}
+
+.h-20 {
+    height: 20%;
+}
+
+.h-30{
+    height: 30%;
+}
+
+.h-40{
+    height: 40%;
 }
 
 .h-95 {
@@ -105,6 +121,10 @@ body {
 
 .rise-color {
     color: #2E7D32;
+}
+
+.neutral-color {
+    color: #f8f9fa;
 }
 
 .fall-color {
@@ -194,4 +214,22 @@ body {
 .flipCardBack {
     transform: rotateY(-180deg);
     overflow-y: auto;
+}
+
+.container, .row, .col-sm-3, .col-sm-9{
+    padding: 0px;
+    margin: 0px;
+    border: 0px;
+}
+
+.large-font{
+    font-size: 20px;
+}
+
+.large-large-font{
+    font-size: 32px;
+}
+
+span {
+    display: inline-block;
 }
