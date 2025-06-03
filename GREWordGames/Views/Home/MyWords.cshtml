@@ -151,22 +151,24 @@
 
     var table = document.getElementById("table");
 
-    var wordIndexes = [[], [], [], []];
+    if (userMetadataRaw.words.length > 2) {
+        var wordIndexes = [[], [], [], []];
 
-    wordIndexes[1] = userMetadataRaw.words.slice(1, (userMetadataRaw.words.length) - 1).split(", ");
-    wordIndexes[2] = userMetadataRaw.dateAdded.slice(1, (userMetadataRaw.dateAdded.length) - 1).split(", ");
-    wordIndexes[3] = userMetadataRaw.proficiency.slice(1, (userMetadataRaw.proficiency.length) - 1).split(", ");
-    wordIndexes[0] = Array.from(Array(wordIndexes[1].length).keys());
-    for (let i = 0; i < wordIndexes[3].length; i++) {
-        wordIndexes[1][i] = CapitalizeFirstLetter(wordIndexes[1][i]);
-        wordIndexes[3][i] = ConvertToProficiency(wordIndexes[3][i]);
+        wordIndexes[1] = userMetadataRaw.words.slice(1, (userMetadataRaw.words.length) - 1).split(", ");
+        wordIndexes[2] = userMetadataRaw.dateAdded.slice(1, (userMetadataRaw.dateAdded.length) - 1).split(", ");
+        wordIndexes[3] = userMetadataRaw.proficiency.slice(1, (userMetadataRaw.proficiency.length) - 1).split(", ");
+        wordIndexes[0] = Array.from(Array(wordIndexes[1].length).keys());
+        for (let i = 0; i < wordIndexes[3].length; i++) {
+            wordIndexes[1][i] = CapitalizeFirstLetter(wordIndexes[1][i]);
+            wordIndexes[3][i] = ConvertToProficiency(wordIndexes[3][i]);
+        }
+
+        var sortedByDateAdded = true;
+        var sortedByWords = false;
+        var sortedByProficiency = false;
+
+        PopulateTable();
     }
-
-    var sortedByDateAdded = true;
-    var sortedByWords = false;
-    var sortedByProficiency = false;
-
-    PopulateTable();
 
     function RefreshTable() {
         $.ajax({
