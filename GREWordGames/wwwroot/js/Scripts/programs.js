@@ -65,6 +65,10 @@ function ConvertToProficiency(inputString) {
     return output;
 }
 
+function CapitalizeFirstLetter(word) {
+    return String(word).charAt(0).toUpperCase() + String(word).slice(1);
+}
+
 function SortByRow(j, wordIndexes, reverse) {
 
     rowSorted = wordIndexes[j].slice();

@@ -1,4 +1,5 @@
-﻿namespace GREWordGames.Models
+﻿
+namespace GREWordGames.Models
 {
     public class UserDetails
     {
@@ -45,6 +46,7 @@
     public class AddWord
     {
         public string Word { get; set; }
+
     }
 
     public class Message

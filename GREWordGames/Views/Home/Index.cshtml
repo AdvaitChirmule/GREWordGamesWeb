@@ -2,22 +2,82 @@
     ViewData["Title"] = "Home Page"; 
 }
 
-@using (Html.BeginForm("GoToLogin", "Home", FormMethod.Post))
-{
-    <button class="btn btn-primary" type="submit">Login</button>
-}
+<div class="bg-white h-100 w-100">
+    <div class="container h-100 w-100 mw-100">
+        <div class="row h-5"></div>
+        <div class="row mh-40 w-100 bg-light d-flex justify-content-center align-items-center">
+            <div class="row w-85 h-100 bg-light">
+                <div class="col-md-8">
+                    <div class="large-large-font"><b><br />Welcome to Vocab Master! 🎓</b><br /><br /></div>
+                    <div class="large-font mb-0"><b>Tired of having endless word lists? </b><br /> Compile all your words on <a href="MyWords">My Words Page</a> so you can revise them, practice them without hassle!<br /><br /></div>
+                    <div class="large-font mb-0"><b>Think you have memorized your list? </b><br /> Test it out on the <a href="Practice">Practice Page</a>, wherein you are given a word at random from your list, tap to reveal the meaning, and record if you got it right!<br /><br /></div>
+                    <div class="large-font mb-0"><b>Want to get competitive and show off your vocab list?* </b><br /> Play a guessing game with your friends on the <a href="WaitingRoom">Game Page</a> with the word list you and your friends are proficient in!<br /><br /></div>
+                    <div>*Feature coming soon<br /><br /></div>
+                </div>
+                <div class="col-md-4 d-flex align-items-center">
+                    <div class="w-100">
+                        <img src="~/images/Queen.jpg" class="img-fluid w-100" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row h-5"></div>
+        <div class="row w-100 large-font pt-3 px-3 bg-light">
+            <b>More resources:</b>
+        </div>
+        <div class="row bg-light w-100">
+            <div class="row row-cols-1 row-cols-md-3 p-3">
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="row g-0 p-3 mh-100">
+                            <div class="col-md-4 d-flex justify-content-center p-3">
+                                <img src="~/images/ETS-Book-Image.jpg" class="h-100 w-100 img-fluid" />
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title"><a target="_blank" href="https://www.ets.org/gre/test-takers/general-test/prepare/prep-books-services.html"><b>Official ETS Book</b></a></h5>
+                                    <p class="card-text">
+                                        Official book from ETS, the maker of the GRE General Test. Contains hundreds of authentic GRE test questions, explanations, test-taking strategies, sample essay responses and more.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="row g-0 p-3 mh-100">
+                            <div class="col-md-4 d-flex justify-content-center p-3">
+                                <img src="~/images/Manhattan-Prep-Image.jpg" class="h-100 w-100 img-fluid" />
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title"><a target="_blank" href="https://www.manhattanprep.com/gre/store/"><b>Manhattan Prep</b></a></h5>
+                                    <p class="card-text">Popular GRE resource that contains more than 1,800 questions. Developed by expert instructors, and grouped into practice sets, the questions mirror those found on the GRE in content, form, and style.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="row g-0 p-3 mh-100">
+                            <div class="col-md-4 d-flex justify-content-center p-3">
+                                <img src="~/images/Magoosh-Book-Image.jpg" class="h-100 w-100 img-fluid" />
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title"><a target="_blank" href="https://magoosh.com/gre/best-gre-books/#MagooshBook"><b>GRE Prep by Magoosh</b></a></h5>
+                                    <p class="card-text">Another popular resource by a leading online test prep company. Contains a sample of the best practice questions and includes advice from seasoned experts.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="height: 60px">
 
-@using (Html.BeginForm("GoToRegister", "Home", FormMethod.Post))
-{
-    <button class="btn btn-primary" type="submit">Register</button>
-}
-
-@using (Html.BeginForm("GoToMyWords", "Home", FormMethod.Post))
-{
-    <button class="btn btn-primary" type="submit">MyWords</button>
-}
-
-@using (Html.BeginForm("GoToWaitingRoom", "Home", FormMethod.Post))
-{
-    <button class="btn btn-primary" type="submit">WaitingRoom</button>
-}
+        </div>
+    </div>
+</div>

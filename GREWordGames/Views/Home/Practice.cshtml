@@ -8,16 +8,18 @@
 <div class="w-100 h-100 bg-light d-flex justify-content-center align-items-center">
     <div class="container bg-white w-75 h-75">
         <div class="row w-100 h-100">
-            <div class="col-sm-3 bg-white">
+            <div class="col-sm-4 bg-white">
                 <div class="container h-100">
-                    <div class="row h-30 d-flex justify-content-center align-items-center">
-                        Word
-                        <div class="d-flex justify-content-center align-items-start large-large-font" id="wordAt"></div>
+                    <div class="row h-10"></div>
+                    <div class="row h-20 d-flex justify-content-center align-items-start">
+                        <div class="d-flex justify-content-center"><b>Word</b></div>
+                        <div class="d-flex justify-content-center large-large-font" id="wordAt"></div>
                     </div>
-                    <div class="row h-30 d-flex justify-content-center align-items-center">
+                    <div class="row h-10"></div>
+                    <div class="row h-20 d-flex justify-content-center align-items-center">
                         <div id="dateStarted"></div>
                         <div id="successRate"></div>
-                        <div>All Words:</div>
+                        <div><b>All Words:</b></div>
                     </div>
                     <div class="row h-40 p-3" id="tickButtons">
                         <div class="col-sm h-100" id="tickButtonGroup0"></div>
@@ -27,12 +29,12 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-9">
+            <div class="col-sm-8 p-0">
                 <div class="row w-100 h-50">
                     <div class="flipCard w-100 h-100 p-0">
                         <div class="flipCardInner" id="cardFlip">
                             <div class="flipCardFront">
-                                <button class="btn secondary-button h-100 w-100" id="wordPlaceholder" onclick="submitWord()">Submit</button>
+                                <button class="btn secondary-button h-100 w-100 large-large-font" id="wordPlaceholder" onclick="submitWord()">Submit</button>
                             </div>
                             <div class="flipCardBack white-background" id="wordMeaningPlaceholder">
                             </div>
@@ -53,6 +55,7 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="~/js/Scripts/programs.js"></script>
 
 <script>
     var wordOutput = @Html.Raw(Json.Serialize(Model));
@@ -72,7 +75,7 @@
         practiceArea.innerText = "No words added";
     }
     else {
-        wordPlaceholder.innerText = wordOutput.words[0];
+        wordPlaceholder.innerText = CapitalizeFirstLetter(wordOutput.words[0]);
     }
 
     var wordIndex = 0;
@@ -85,10 +88,18 @@
     wordAt.innerText = "1";
 
     var dateStarted = document.getElementById("dateStarted");
-    dateStarted.innerHTML = "<b>Session Started:</b> " + Date.now();
+    var dateUnits = new Date(Date.now());
+    dateStarted.innerHTML = "<b>Session Started:</b> " + dateUnits.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
 
     var successRate = document.getElementById("successRate");
-    successRate.innerHTML = "<b>Progress:</b> 100%";
+    successRate.innerHTML = "<b>Success Rate:</b> 100%";
     
     for (let i = 0; i < 4; i++) {
         var tickButtons = document.getElementById("tickButtonGroup" + i.toString());
@@ -145,7 +156,7 @@
         rightButton.disabled = true;
         wordIndex = wordIndex + 1;
 
-        if (wordIndex == wordOutput.words.length) {
+        if (wordIndex == wordOutput.words.length || wordIndex == 20) {
             $.ajax({
                 url: "/RegisterWrong",
                 type: "GET",
@@ -155,10 +166,10 @@
                     wrongButton.disabled = true;
                     rightButton.disabled = true;
 
-                    wordAt.innerText = wordIndex;
+                    wordAt.innerText = "Complete!";
 
                     percDen += 1;
-                    successRate.innerHTML = "<b>Progress:</b> " + (Math.round((100 * percNum) / percDen)).toString() + "%";
+                    successRate.innerHTML = "<b>Success Rate:</b> " + (Math.round((100 * percNum) / percDen)).toString() + "%";
 
                     var tickButtonId = "tick" + (wordIndex - 1).toString();
                     var tickButton = eval(tickButtonId);
@@ -177,7 +188,7 @@
             })
         }
         else {
-            wordPlaceholder.innerText = wordOutput.words[wordIndex]
+            wordPlaceholder.innerText = CapitalizeFirstLetter(wordOutput.words[wordIndex])
             wordMeaningPlaceholder.innerText = "";
 
             $.ajax({
@@ -189,10 +200,10 @@
                     wordMeaning = response.wordMeaning;
                     lastWordCache = wordOutput.words[wordIndex]
 
-                    wordAt.innerText = wordIndex;
+                    wordAt.innerText = wordIndex + 1;
 
                     percDen += 1;
-                    successRate.innerHTML = "<b>Progress:</b> " + (Math.round((100 * percNum) / percDen)).toString() + "%";
+                    successRate.innerHTML = "<b>Success Rate:</b> " + (Math.round((100 * percNum) / percDen)).toString() + "%";
 
                     var tickButtonId = "tick" + (wordIndex - 1).toString();
                     var tickButton = eval(tickButtonId);
@@ -234,7 +245,7 @@
         rightButton.disabled = true;
         wordIndex = wordIndex + 1;
 
-        if (wordIndex == wordOutput.words.length) {
+        if (wordIndex == wordOutput.words.length || wordIndex == 20) {
             $.ajax({
                 url: "/RegisterRight",
                 type: "GET",
@@ -244,11 +255,11 @@
                     wrongButton.disabled = true;
                     rightButton.disabled = true;
 
-                    wordAt.innerText = wordIndex;
+                    wordAt.innerText = "Complete!";
 
                     percNum += 1
                     percDen += 1;
-                    successRate.innerHTML = "<b>Progress:</b> " + (Math.round((100 * percNum) / percDen)).toString() + "%";
+                    successRate.innerHTML = "<b>Success Rate:</b> " + (Math.round((100 * percNum) / percDen)).toString() + "%";
 
                     var tickButtonId = "tick" + (wordIndex - 1).toString();
                     var tickButton = eval(tickButtonId);
@@ -267,7 +278,7 @@
             })
         }
         else {
-            wordPlaceholder.innerText = wordOutput.words[wordIndex]
+            wordPlaceholder.innerText = CapitalizeFirstLetter(wordOutput.words[wordIndex])
             wordMeaningPlaceholder.innerText = "";
 
             $.ajax({
@@ -279,11 +290,11 @@
                     wordMeaning = response.wordMeaning;
                     lastWordCache = wordOutput.words[wordIndex]
 
-                    wordAt.innerText = wordIndex;
+                    wordAt.innerText = wordIndex + 1;
 
                     percNum += 1
                     percDen += 1;
-                    successRate.innerHTML = "<b>Progress:</b> " + (Math.round((100 * percNum) / percDen)).toString() + "%";
+                    successRate.innerHTML = "<b>Success Rate:</b> " + (Math.round((100 * percNum) / percDen)).toString() + "%";
 
                     var tickButtonId = "tick" + (wordIndex - 1).toString();
                     var tickButton = eval(tickButtonId);

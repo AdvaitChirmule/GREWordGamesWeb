@@ -106,6 +106,9 @@ namespace GREWordGames.Controllers
         public async Task<IActionResult> AddWordAction(WordViewModel model)
         {
             var addWord = model.AddWord;
+
+            addWord.Word = addWord.Word.ToLower();
+
             var token = HttpContext.Session.GetString("token");
             var uid = HttpContext.Session.GetString("uid");
 

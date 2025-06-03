@@ -77,38 +77,50 @@
             </div>
         </div>
         -->
-        <div class="round-login bg-white mb-3 p-3">
-            <table class="table" id="table">
-                <thead>
-                    <tr style="min-width: 50px">
-                        @using (Html.BeginForm("AddWordAction", "Home", FormMethod.Post))
-                        {
+        <div class="container round-login bg-white mb-3 p-3">
+            <div class="row large-large-font">
+                My Words
+            </div>
+            <div class="row">
+                <br />
+                This is where you compile all your words. Use the input box to simply add whatever word you want to add to your own database. You can also view when you added a word and track how well you did with that word. 
+                <br /><br />
+                You can also sort by word, date added or proficiency to organize more efficienctly. 
+                <br /><br />
+            </div>
+            <div class="row p-3 small-rounded-border">
+                <table class="table" id="table">
+                    <thead>
+                        <tr style="min-width: 50px">
+                            @using (Html.BeginForm("AddWordAction", "Home", FormMethod.Post))
                             {
-                                <th colspan="4" class="p-0">
-                                    @Html.TextBoxFor(model => model.AddWord.Word, new { @class = "form-control", @placeholder = "Search or Add Word" })
-                                </th>
-                                <th colspan="1" class="p-0">
-                                    <button class="btn primary-button w-100" type="submit">Add Word</button>
-                                </th>
+                                {
+                                    <th colspan="4" class="p-0">
+                                        @Html.TextBoxFor(model => model.AddWord.Word, new { @class = "form-control", @placeholder = "Add Word" })
+                                    </th>
+                                    <th colspan="1" class="p-0">
+                                        <button class="btn primary-button w-100" type="submit">Add Word</button>
+                                    </th>
+                                }
                             }
-                        }
-                    </tr>
-                    <tr style="width: 30px">
-                        <th colspan="5" class="p-0">
-                            <div id="notificationBar"></div>
-                        </th>
-                    </tr>
-                    <tr class="primary-background">
-                        <th class="t-col-1"><button class="btn primary-button" onclick="sortByDateAdded()">Sr No.</button></th>
-                        <th class="t-col-4"><button class="btn primary-button" onclick="sortByWord()">Words</button></th>
-                        <th class="t-col-2"><button class="btn primary-button" onclick="sortByDateAdded()">Date Added</button></th>
-                        <th class="t-col-2"><button class="btn primary-button" onclick="sortByProficiency()">Proficiency</button></th>
-                        <th class="t-col-1 primary-background">Delete</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+                        </tr>
+                        <tr style="height: 40px">
+                            <th colspan="5" class="p-2">
+                                <div id="notificationBar"></div>
+                            </th>
+                        </tr>
+                        <tr class="primary-background">
+                            <th class="t-col-1 px-0"><button class="btn primary-button-variant w-100 d-flex justify-content-start" onclick="sortByDateAdded()">⇅ Sr No.</button></th>
+                            <th class="t-col-4 px-0"><button class="btn primary-button-variant w-100 d-flex justify-content-start" onclick="sortByWord()">⇅ Words</button></th>
+                            <th class="t-col-2 px-0"><button class="btn primary-button-variant w-100 d-flex justify-content-start" onclick="sortByDateAdded()">⇅ Date Added</button></th>
+                            <th class="t-col-2 px-0"><button class="btn primary-button-variant w-100 d-flex justify-content-start" onclick="sortByProficiency()">⇅ Proficiency</button></th>
+                            <th class="t-col-2 px-0"><button class="btn primary-button-variant w-100 d-flex justify-content-start" disabled>Delete</button></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -146,6 +158,7 @@
     wordIndexes[3] = userMetadataRaw.proficiency.slice(1, (userMetadataRaw.proficiency.length) - 1).split(", ");
     wordIndexes[0] = Array.from(Array(wordIndexes[1].length).keys());
     for (let i = 0; i < wordIndexes[3].length; i++) {
+        wordIndexes[1][i] = CapitalizeFirstLetter(wordIndexes[1][i]);
         wordIndexes[3][i] = ConvertToProficiency(wordIndexes[3][i]);
     }
 
