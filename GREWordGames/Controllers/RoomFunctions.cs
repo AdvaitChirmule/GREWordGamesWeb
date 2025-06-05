@@ -12,14 +12,15 @@ namespace GREWordGames.Controllers
         private string _token;
         private string _uid;
 
-        private readonly FirebaseAPI _firebaseAPI;
+        private readonly FirebaseUserAPI _firebaseUserAPI;
+        private readonly FirebaseGameRoomAPI _firebaseGameRoomAPI;
         private readonly CommonFunctions _commonFunctions;
 
         public RoomFunctions(string token, string uid, ISession session)
         {
             _token = token;
             _uid = uid;
-            _firebaseAPI = new FirebaseAPI(_token, _uid);
+            _firebaseUserAPI = new FirebaseUserAPI(_token, _uid);
             _commonFunctions = new CommonFunctions();
             _session = session;
         }
@@ -29,7 +30,7 @@ namespace GREWordGames.Controllers
             RoomNumber = roomNumber;
             _token = token;
             _uid = uid;
-            _firebaseAPI = new FirebaseAPI(_token, _uid);
+            _firebaseUserAPI = new FirebaseUserAPI(_token, _uid);
             _commonFunctions = new CommonFunctions();
             _session = session;
         }
@@ -39,7 +40,7 @@ namespace GREWordGames.Controllers
             Password = password;
             _token = token;
             _uid = uid;
-            _firebaseAPI = new FirebaseAPI(_token, _uid);
+            _firebaseUserAPI = new FirebaseUserAPI(_token, _uid);
             _commonFunctions = new CommonFunctions();
             _session = session;
         }
@@ -49,14 +50,14 @@ namespace GREWordGames.Controllers
             Password = password;
             _token = token;
             _uid = uid;
-            _firebaseAPI = new FirebaseAPI(_token, _uid);
+            _firebaseUserAPI = new FirebaseUserAPI(_token, _uid);
             _commonFunctions = new CommonFunctions();
             _session = session;
         }
 
         public async Task SetRoomNumber(string password, string name)
         {
-            RoomNumber = await _firebaseAPI.GetNextFreeRoom(password, name);
+            RoomNumber = await _firebaseGameRoomAPI.GetNextFreeRoom(password, name);
             _session.SetInt32("roomNumber", RoomNumber);
         }
 
@@ -81,40 +82,40 @@ namespace GREWordGames.Controllers
 
         public async Task<(bool, string)> VerifyRoomDetails(int roomNumber, string password, string name2)
         {
-            int maxRoomCount = await _firebaseAPI.GetTotalRoomCount();
+            int maxRoomCount = await _firebaseGameRoomAPI.GetTotalRoomCount();
             if ((roomNumber > maxRoomCount) || (roomNumber < 1))
             {
                 return (false, "Invalid Room Number");
             }
             else
             {
-                return await _firebaseAPI.VerifyCredentials(roomNumber, password, name2, _uid);
+                return await _firebaseGameRoomAPI.VerifyCredentials(roomNumber, password, name2, _uid);
             }
         }
 
         public async Task<String> WaitForPlayers(int roomNumber)
         {
-            return await _firebaseAPI.WaitForPlayers(roomNumber);
+            return await _firebaseGameRoomAPI.WaitForPlayers(roomNumber);
         }
 
         public async Task CloseRoom(int roomNumber)
         {
-            await _firebaseAPI.CloseRoom(roomNumber);
+            await _firebaseGameRoomAPI.CloseRoom(roomNumber);
         }
 
         public async Task<bool> WaitToStart(int roomNumber)
         {
-            return await _firebaseAPI.WaitToStart(roomNumber);
+            return await _firebaseGameRoomAPI.WaitToStart(roomNumber);
         }
 
         public async Task<bool> StartGame(int rounds)
         {
             int roomNumber = GetRoomNumber();
 
-            string wordListHostRaw = await _firebaseAPI.GetUserWordList();
+            string wordListHostRaw = await _firebaseUserAPI.GetUserWordList();
 
-            string guestUid = await _firebaseAPI.GetGuestUID(roomNumber);
-            string wordListGuestRaw = await _firebaseAPI.GetUserWordList(guestUid);
+            string guestUid = await _firebaseGameRoomAPI.GetGuestUID(roomNumber);
+            string wordListGuestRaw = await _firebaseUserAPI.GetUserWordList(guestUid);
 
             List<string> wordListHost = _commonFunctions.ConvertStringToList(wordListHostRaw);
             List<string> wordListGuest = _commonFunctions.ConvertStringToList(wordListGuestRaw);
@@ -123,12 +124,12 @@ namespace GREWordGames.Controllers
 
             string commonWordsRaw = _commonFunctions.ConvertListToString(commonWords);
 
-            return await _firebaseAPI.StartGame(roomNumber, commonWordsRaw);
+            return await _firebaseGameRoomAPI.StartGame(roomNumber, commonWordsRaw);
         }
 
         public async Task<List<string>> GetWordList(int roomNumber)
         {
-            string wordListRaw = await _firebaseAPI.GetGameWords(roomNumber);
+            string wordListRaw = await _firebaseGameRoomAPI.GetGameWords(roomNumber);
             List<string> wordList = _commonFunctions.ConvertStringToList(wordListRaw);
             return wordList;
         }

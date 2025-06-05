@@ -71,14 +71,6 @@
     wrongButton.disabled = true;
     rightButton.disabled = true;
 
-    if (wordOutput.words.length == 0) {
-        wordPlaceholder.innerText = "No words added. Add words to your list to practice!";
-        submitButton.disabled = true;
-    }
-    else {
-        wordPlaceholder.innerText = CapitalizeFirstLetter(wordOutput.words[0]);
-    }
-
     var wordIndex = 0;
     var percNum = 0;
     var percDen = 0;
@@ -86,8 +78,6 @@
     var wordMeaning = "";
 
     var wordAt = document.getElementById("wordAt");
-    wordAt.innerText = "1";
-
     var dateStarted = document.getElementById("dateStarted");
     var dateUnits = new Date(Date.now());
     dateStarted.innerHTML = "<b>Session Started:</b> " + dateUnits.toLocaleString('en-US', {
@@ -114,23 +104,32 @@
         tickButtons.innerHTML = tickButtonHTML;
     }
 
-    $.ajax({
-        url: "/GetNextWord",
-        type: "GET",
-        data: { word: wordOutput.words[wordIndex] }
-    }).done(response => {
-        if (response.success) {
-            wordMeaning = response.wordMeaning;
-            lastWordCache = wordOutput.words[wordIndex]
-        }
-        else {
+    if (wordOutput.words.length == 0) {
+        wordAt.innerText = "0";
+        wordPlaceholder.innerHTML = "No words added. <br/> Add words to your list to practice!";
+        submitButton.disabled = true;
+    }
+    else {
+        wordAt.innerText = "1";
+        wordPlaceholder.innerText = CapitalizeFirstLetter(wordOutput.words[0]);
+        $.ajax({
+            url: "/GetNextWord",
+            type: "GET",
+            data: { word: wordOutput.words[wordIndex] }
+        }).done(response => {
+            if (response.success) {
+                wordMeaning = response.wordMeaning;
+                lastWordCache = wordOutput.words[wordIndex]
+            }
+            else {
+                wordMeaning = "Unexpected Error Occured";
+                lastWordCache = "";
+            }
+        }).fail(response => {
             wordMeaning = "Unexpected Error Occured";
             lastWordCache = "";
-        }
-    }).fail(response => {
-        wordMeaning = "Unexpected Error Occured";
-        lastWordCache = "";
-    })
+        })
+    }
 
     function submitWord() {
         async function waitForCondition() {

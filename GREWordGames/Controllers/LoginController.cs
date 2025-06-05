@@ -15,7 +15,7 @@ namespace GREWordGames.Controllers
 	{
         private readonly FirebaseAuthClient _firebaseAuth;
         private readonly LoginFunctions _loginFunctions;
-        private FirebaseAPI _firebaseAPI;
+        private FirebaseUserAPI _firebaseAPI;
 
         public LoginController(FirebaseAuthClient firebaseAuth)
         {

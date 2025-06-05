@@ -219,7 +219,6 @@
         }
 
         wordIndexes = SortByRow(columnToBeSortedBy, wordIndexes, sortReverse);
-        console.log(wordIndexes);
         $("table tbody tr").remove();
         PopulateTable();
     }
@@ -238,7 +237,6 @@
         }
 
         wordIndexes = SortByRow(columnToBeSortedBy, wordIndexes, sortReverse);
-        console.log(wordIndexes);
         $("table tbody tr").remove();
         PopulateTable();
     }
@@ -257,19 +255,18 @@
         }
 
         wordIndexes = SortByRow(columnToBeSortedBy, wordIndexes, sortReverse);
-        console.log(wordIndexes);
         $("table tbody tr").remove();
         PopulateTable();
     }
 
     function deleteWord(id) {
-
+        console.log(id);
         var messageBar = document.getElementById("notificationBar");
 
         $.ajax({
             url: "/DeleteWord",
             type: "GET",
-            data: { id: id }
+            data: { wordIndex: id }
         }).done(response => {
             if (response.success) {
                 messageBar.innerHTML = "Deleted Word";

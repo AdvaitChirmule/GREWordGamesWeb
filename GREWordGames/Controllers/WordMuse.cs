@@ -67,7 +67,7 @@ namespace GREWordGames.Controllers
             }
         }
 
-        public async Task<String> AddWordToGlobalDatabase(string word, string token)
+        public async Task<(bool, String)> GetWordMeaning(string word)
         {
             string wordMuseURL = "https://api.datamuse.com/words?sl=" + word + "&max=10&md=d";
             try
@@ -84,39 +84,20 @@ namespace GREWordGames.Controllers
                     {
                         if (apiDataJson[i].word == word)
                         {
-                            var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
-                                    new FirebaseOptions
-                                    {
-                                        AuthTokenAsyncFactory = () => Task.FromResult(token)
-                                    });
-
-                            int wordCount = await firebaseClient.Child("words").Child("wordCount").OnceSingleAsync<int>();
-
-                            wordCount += 1;
-                            var wordMetadata = new WordMetadata { id = wordCount, wordMeaning = $"[{string.Join(", ", apiDataJson[i].defs)}]" };
-
-                            await firebaseClient.Child("words").Child("wordCount").PutAsync(wordCount);
-                            await firebaseClient.Child("words").Child(word).PutAsync(wordMetadata);
-
-                            foundWordFlag = true;
-                            break;
+                            return (true, $"[{string.Join(", ", apiDataJson[i].defs)}]");
                         }
                     }
 
-                    if (!foundWordFlag)
-                    {
-                        return "Word Deemed Invalid";
-                    }
-                    return "Success";
+                    return (false, "Word Deemed Invalid");
                 }
                 else
                 {
-                    return "Unexpected Server Error while adding Word to the Database";
+                    return (false, "Unexpected Server Error while adding Word to the Database");
                 }
             }
             catch
             {
-                return "Unexpected Server Error while adding Word to the Database";
+                return (false, "Unexpected Server Error while adding Word to the Database");
             }
         }
 

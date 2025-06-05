@@ -113,7 +113,7 @@ namespace GREWordGames.Controllers
                 _session.SetString("name", userDetails.Name);
 
 
-                FirebaseAPI _firebaseAPI = new FirebaseAPI(token, uid);
+                FirebaseUserAPI _firebaseAPI = new FirebaseUserAPI(token, uid);
                 await _firebaseAPI.AddUser(userDetails.Name);
                 return true;
             }

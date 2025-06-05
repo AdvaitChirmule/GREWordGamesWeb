@@ -22,6 +22,7 @@ namespace GREWordGames.Controllers
         private readonly WordMuseAPI _wordMuseAPI;
         private readonly CommonFunctions _commonFunctions;
         private AllWords _practiceWordOrder;
+        MyWordsFunctions _myWordsFunctions;
 
         private string _token;
         private string _uid;
@@ -39,6 +40,8 @@ namespace GREWordGames.Controllers
             _token = HttpContext.Session.GetString("token");
             _uid = HttpContext.Session.GetString("uid");
             _name = HttpContext.Session.GetString("name");
+
+            _myWordsFunctions = new MyWordsFunctions(_token, _uid, HttpContext.Session);
             base.OnActionExecuting(context);
         }
 
@@ -58,22 +61,13 @@ namespace GREWordGames.Controllers
 
         public async Task<IActionResult> MyWords()
         {
-            var token = HttpContext.Session.GetString("token");
-            if (string.IsNullOrEmpty(token))
+            if (string.IsNullOrEmpty(_token))
             {
                 return RedirectToAction("Login");
             }
             else
-            {
-                var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
-                    new FirebaseOptions
-                    {
-                        AuthTokenAsyncFactory = () => Task.FromResult(token)
-                    });
-
-                var uid = HttpContext.Session.GetString("uid");
-                var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
-                var emptyWord = new AddWord { Word = "" };
+            {                
+                var userDetails = await _myWordsFunctions.GetUserTableRows();
 
                 if (TempData["Message"] != null)
                 {
@@ -84,14 +78,9 @@ namespace GREWordGames.Controllers
                     ViewBag.Message = "";
                 }
 
-                var notificationMessage = new Message { NotificationMessage = ViewBag.Message };
+                var model = _myWordsFunctions.PrepareModel(userDetails, ViewBag.Message);
 
-                var model = new WordViewModel
-                {
-                    UserMetadata = userDetails,
-                    AddWord = emptyWord,
-                    Message = notificationMessage
-                };
+                
                 return View(model);
             }
         }
@@ -109,96 +98,68 @@ namespace GREWordGames.Controllers
 
             addWord.Word = addWord.Word.ToLower();
 
-            var token = HttpContext.Session.GetString("token");
-            var uid = HttpContext.Session.GetString("uid");
-
-            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(uid))
+            if (string.IsNullOrEmpty(_token) || string.IsNullOrEmpty(_uid))
             {
                 TempData["LoginMessage"] = "Session Expired. Please login again";
                 RedirectToAction("Login");
             }
 
-            var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
-                    new FirebaseOptions
-                    {
-                        AuthTokenAsyncFactory = () => Task.FromResult(token)
-                    });
-
-            var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
-
-            if (_commonFunctions.CheckIfWordInDatabase(userDetails.words, addWord.Word) == true)
+            if (await _myWordsFunctions.CheckIfWordInDatabase(addWord.Word))
             {
                 TempData["Message"] = "Word already in the Database";
                 return RedirectToAction("MyWords");
             }
-               
-            var globalDictionaryCheck = await firebaseClient.Child("words").Child(addWord.Word).OnceSingleAsync<WordMetadata>();
 
-            if (globalDictionaryCheck == null)
+            if (!await _myWordsFunctions.CheckIfWordInGlobalDatabase(addWord.Word))
             {
-                string addWordMessage = await _wordMuseAPI.AddWordToGlobalDatabase(addWord.Word, token);
-                if (addWordMessage != "Success")
+                (bool success, string message) = await _myWordsFunctions.AddWordToGlobalDatabase(addWord.Word);
+                if (!success)
                 {
-                    TempData["Message"] = addWordMessage;
+                    TempData["Message"] = message;
                     return RedirectToAction("MyWords");
                 }
             }
-
-            bool result = await _wordMuseAPI.AddWordToFirebase(userDetails, addWord.Word, token, uid);
-
-            if (result == false)
+            
+            if (await _myWordsFunctions.AddWordToUserDatabase(addWord.Word))
             {
-                TempData["Message"] = "Unexpected Error occured";
+                TempData["Message"] = "Successfully added " + addWord.Word + " to the database";
             }
             else
             {
-                TempData["Message"] = "Successfully added Word to Database";
+                TempData["Message"] = "Server side error in adding word, please try again";
+                return RedirectToAction("MyWords");
             }
 
             return RedirectToAction("MyWords");
         }
 
         [HttpGet]
-        public async Task<JsonResult> DeleteWord(string id)
+        public async Task<JsonResult> DeleteWord(int wordIndex)
         {
-            var token = HttpContext.Session.GetString("token");
-
-            if (string.IsNullOrEmpty(token))
+            var deleteAlready = TempData["DeleteInProcess"];
+            if (deleteAlready != null)
             {
-                RedirectToAction("Login");
+                return Json(new { success = false });
             }
 
-            var firebaseClient = new FirebaseClient("https://grewordgames-default-rtdb.firebaseio.com",
-                    new FirebaseOptions
-                    {
-                        AuthTokenAsyncFactory = () => Task.FromResult(token)
-                    });
+            TempData["DeleteInProcess"] = true;
 
-            var uid = HttpContext.Session.GetString("uid");
-            var userDetails = await firebaseClient.Child("metadata").Child(uid).OnceSingleAsync<UserMetadata>();
-
-            var user = _commonFunctions.ConvertRawDataToList(userDetails);
-
-            var updatedUser = _commonFunctions.DeleteRow(user, int.Parse(id));
-
-            userDetails.words = _commonFunctions.ConvertListToString(updatedUser.wordList);
-            userDetails.proficiency = _commonFunctions.ConvertListToString(updatedUser.proficiencyList);
-            userDetails.dateAdded = _commonFunctions.ConvertListToString(updatedUser.dateAddedList);
-
-            await firebaseClient.Child("metadata").Child(uid).PutAsync(userDetails);
-
-            return Json(new { success = true });
+            if (await _myWordsFunctions.DeleteWordFromUserDatabase(wordIndex))
+            {
+                TempData["Message"] = "Word successfully deleted!";
+                HttpContext.Session.Remove("DeleteInProcess");
+                return Json(new { success = true });
+            }
+            else
+            {
+                HttpContext.Session.Remove("DeleteInProcess");
+                return Json(new { success = false });
+            }
         }
 
         public IActionResult AboutGame()
         {
             return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
         [HttpPost]

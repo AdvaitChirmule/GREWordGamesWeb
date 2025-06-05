@@ -9,7 +9,7 @@ namespace GREWordGames.Controllers
     public class PracticePageFunctions
     {
         private readonly CommonFunctions _commonFunctions;
-        private readonly FirebaseAPI _firebaseAPI;
+        private readonly FirebaseUserAPI _firebaseAPI;
         private string _token;
         private string _uid;
         private ISession _session;
@@ -19,7 +19,7 @@ namespace GREWordGames.Controllers
             _uid = uid;
             _session = session;
             _commonFunctions = new CommonFunctions();
-            _firebaseAPI = new FirebaseAPI(_token, _uid);
+            _firebaseAPI = new FirebaseUserAPI(_token, _uid);
         }
         public async Task<(List<string>, List<string>, List<string>, List<string>)> SegregateByUserDifficulty()
         {

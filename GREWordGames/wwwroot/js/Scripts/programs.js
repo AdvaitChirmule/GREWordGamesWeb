@@ -73,7 +73,13 @@ function SortByRow(j, wordIndexes, reverse) {
 
     rowSorted = wordIndexes[j].slice();
 
-    rowSorted.sort();
+    if (j == 0) {
+        rowSorted.sort((a, b) => a - b);
+    }
+    else {
+        rowSorted.sort();
+    }
+    
     if (reverse == true) {
         rowSorted.reverse();
     }
