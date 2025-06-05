@@ -72,7 +72,8 @@
     rightButton.disabled = true;
 
     if (wordOutput.words.length == 0) {
-        practiceArea.innerText = "No words added";
+        wordPlaceholder.innerText = "No words added. Add words to your list to practice!";
+        submitButton.disabled = true;
     }
     else {
         wordPlaceholder.innerText = CapitalizeFirstLetter(wordOutput.words[0]);
