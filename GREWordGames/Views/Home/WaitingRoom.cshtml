@@ -4,29 +4,36 @@
 
 @model HostRoomDetails
 
-<h1>Waiting Room</h1>
-
-<div>
-    <table>
-        <tr>
-            <td>
+<div class="w-100 h-100 bg-light d-flex justify-content-center align-items-center">
+    <div class="w-75 h-75 container">
+        <div class="row w-100 h-100">
+            <div class="col-sm-5">
+                <div class="large-large-font w-100 h-20 d-flex justify-content-center">Host Room</div>
                 <label for="enterPassword" class="form-label">Enter Password (optional)</label>
                 <input type="text" id="enterPassword" name="enterPassword" class="form-control" />
 
-                <button class="btn btn-primary" type="submit" onclick="hostRoom()">Host Room</button>
+                <label for="enterRounds" type="form-lavel">Enter Number of Words</label>
+                <input type="number" id="enterRounds" name="enterRounds" class="form-control" />
+
+                <input class="form-check-input" type="checkbox" value="" id="nonOverlappingWords">
+                <label class="form-check-label" for="nonOverlappingWords"> Use non-overlapping words </label>
+
+                <button class="btn primary-background" type="submit" onclick="hostRoom()">Host Room</button>
 
                 <div id="messageBar"></div>
 
+                <div id="addedRoom"></div>
+
                 @using (Html.BeginForm("StartGame", "Home", FormMethod.Post))
                 {
-                    <label for="wordLimit" type="form-lavel">Enter Number of Words</label>
-                    @Html.TextBoxFor(model => model.Rounds, new { @class="form-control", @type = "number", @placeholder = "Default: Five Rounds" })
-
+                    
                     <div id="displayStartButton"></div>
                 }
-
-            </td>
-            <td>
+            </div>
+            <div class="col-sm-2">
+                or
+            </div>
+            <div class="col-sm-5">
                 <label for="joinRoomNumber" class="form-label">Enter Room Number</label>
                 <input type="text" class="form-control" id="joinRoomNumber" name="joinRoomNumber" />
 
@@ -34,12 +41,11 @@
                 <input type="text" class="form-control" id="joinPassword" name="joinPassword" />
 
                 <button class="btn btn-primary" type="submit" onclick="joinRoom()">Join Room</button>
-            </td>
-        </tr>
-    </table>
-</div>
+            </div>
+        </div>
+    </div>
 
-<div id="addedRoom"></div>
+</div>
 
 <script>
     function hostRoom(){
@@ -48,11 +54,13 @@
         var displayStartButton = document.getElementById("displayStartButton");
 
         var passwordInput = document.getElementById("enterPassword").value;
+        var rounds = document.getElementById("enterRounds").value;
+        var tick = document.getElementById("nonOverlappingWords").value;
 
         $.ajax({
             url: "/HostRoom",
             type: "GET",
-            data: { password: passwordInput }
+            data: { password: passwordInput, rounds: rounds, exclusive: tick }
         }).done(response => {
             if (response.success) {
                 addRoomDetails.innerHTML = "<h1>" + response.roomNumber.toString() + "</h1>";
@@ -61,7 +69,7 @@
             messageBar.innerHTML = response.message;
 
             waitForPlayers(response.roomNumber);
-            displayStartButton.innerHTML = '<button class="btn btn-primary" type="submit" onclick="startGame()" disabled>Start Game</button>';
+            displayStartButton.innerHTML = '<button class="btn primary-background" type="submit" disabled>Start Game</button>';
 
         }).fail(response => {
             messageBar.innerHTML = "Unexpected Error Occured";
@@ -100,7 +108,7 @@
             data: { roomNumber: roomNumber }
         }).done(response => {
             if (response.success) {
-                displayStartButton.innerHTML = '<button class="btn btn-primary" type="submit" onclick="startGame()">Start Game</button>';
+                displayStartButton.innerHTML = '<button class="btn btn-primary" type="submit">Start Game</button>';
             }
             messageBar.innerHTML = response.message;
 

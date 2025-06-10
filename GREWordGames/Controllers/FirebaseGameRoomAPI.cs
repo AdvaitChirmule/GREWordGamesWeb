@@ -116,11 +116,13 @@ namespace GREWordGames.Controllers
             await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).PutAsync(emptyRoom);
         }
 
-        public async Task<bool> StartGame(int roomNumber, string wordList)
+        public async Task<bool> StartGame(int roomNumber, string wordList, int rounds)
         {
             FirebaseRoomDetails room = await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).OnceSingleAsync<FirebaseRoomDetails>();
             room.WordList = wordList;
+            room.Rounds = rounds;
             room.StartFlag = true;
+            room.StartTime = DateTime.UtcNow.AddSeconds(10).ToString();
             await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).PutAsync(room);
             return true;
         }
@@ -159,6 +161,12 @@ namespace GREWordGames.Controllers
         {
             string wordList = await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("WordList").OnceSingleAsync<string>();
             return wordList;
+        }
+
+        public async Task<string> GetStartTime(int roomNumber)
+        {
+            string startTime = await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("StartTime").OnceSingleAsync<string>();
+            return startTime;
         }
     }
 }

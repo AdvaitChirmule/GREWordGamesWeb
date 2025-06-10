@@ -77,7 +77,7 @@ namespace GREWordGames.Controllers
             }
             else
             {
-                return RedirectToAction("MyWords");
+                return RedirectToAction("Index");
             }          
         }
 

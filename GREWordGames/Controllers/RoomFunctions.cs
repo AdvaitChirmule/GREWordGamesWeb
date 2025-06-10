@@ -1,5 +1,6 @@
 ﻿using System.Collections.Specialized;
 using System.Diagnostics;
+using GREWordGames.Models;
 
 namespace GREWordGames.Controllers
 {
@@ -12,6 +13,8 @@ namespace GREWordGames.Controllers
         private string _token;
         private string _uid;
 
+        private bool valid = false;
+
         private readonly FirebaseUserAPI _firebaseUserAPI;
         private readonly FirebaseGameRoomAPI _firebaseGameRoomAPI;
         private readonly CommonFunctions _commonFunctions;
@@ -21,6 +24,7 @@ namespace GREWordGames.Controllers
             _token = token;
             _uid = uid;
             _firebaseUserAPI = new FirebaseUserAPI(_token, _uid);
+            _firebaseGameRoomAPI = new FirebaseGameRoomAPI(_token, _uid);
             _commonFunctions = new CommonFunctions();
             _session = session;
         }
@@ -31,6 +35,7 @@ namespace GREWordGames.Controllers
             _token = token;
             _uid = uid;
             _firebaseUserAPI = new FirebaseUserAPI(_token, _uid);
+            _firebaseGameRoomAPI = new FirebaseGameRoomAPI(_token, _uid);
             _commonFunctions = new CommonFunctions();
             _session = session;
         }
@@ -41,6 +46,7 @@ namespace GREWordGames.Controllers
             _token = token;
             _uid = uid;
             _firebaseUserAPI = new FirebaseUserAPI(_token, _uid);
+            _firebaseGameRoomAPI = new FirebaseGameRoomAPI(_token, _uid);
             _commonFunctions = new CommonFunctions();
             _session = session;
         }
@@ -51,6 +57,7 @@ namespace GREWordGames.Controllers
             _token = token;
             _uid = uid;
             _firebaseUserAPI = new FirebaseUserAPI(_token, _uid);
+            _firebaseGameRoomAPI = new FirebaseGameRoomAPI(_token, _uid);
             _commonFunctions = new CommonFunctions();
             _session = session;
         }
@@ -59,6 +66,24 @@ namespace GREWordGames.Controllers
         {
             RoomNumber = await _firebaseGameRoomAPI.GetNextFreeRoom(password, name);
             _session.SetInt32("roomNumber", RoomNumber);
+        }
+
+        public void SetGameRoomDetails(int rounds, bool exclusive)
+        {
+            if (rounds == 0)
+            {
+                rounds = 5;
+            }
+
+            _session.SetInt32("rounds", rounds);
+            if (exclusive)
+            {
+                _session.SetInt32("exclusive", 1);
+            }
+            else
+            {
+                _session.SetInt32("exclusive", 0);
+            }
         }
 
         public bool RoomAssigned()
@@ -108,8 +133,16 @@ namespace GREWordGames.Controllers
             return await _firebaseGameRoomAPI.WaitToStart(roomNumber);
         }
 
-        public async Task<bool> StartGame(int rounds)
+        public async Task<bool> StartGame()
         {
+            int rounds = _session.GetInt32("rounds") ?? 5;
+            int exclusive = _session.GetInt32("exclusive") ?? 0;
+            bool overlap = false;
+            if (exclusive == 1)
+            {
+                overlap = true;
+            }
+
             int roomNumber = GetRoomNumber();
 
             string wordListHostRaw = await _firebaseUserAPI.GetUserWordList();
@@ -120,11 +153,19 @@ namespace GREWordGames.Controllers
             List<string> wordListHost = _commonFunctions.ConvertStringToList(wordListHostRaw);
             List<string> wordListGuest = _commonFunctions.ConvertStringToList(wordListGuestRaw);
 
-            List<string> commonWords = _commonFunctions.FindCommonWordsForNRounds(wordListHost, wordListGuest, rounds);
+            List<string> commonWords = _commonFunctions.FindCommonWordsForNRounds(wordListHost, wordListGuest, rounds, overlap);
 
             string commonWordsRaw = _commonFunctions.ConvertListToString(commonWords);
 
-            return await _firebaseGameRoomAPI.StartGame(roomNumber, commonWordsRaw);
+            _session.SetInt32("GamePlayer", 1);
+            valid = true;
+
+            return await _firebaseGameRoomAPI.StartGame(roomNumber, commonWordsRaw, rounds);
+        }
+
+        public bool IsValid()
+        {
+            return valid;
         }
 
         public async Task<List<string>> GetWordList(int roomNumber)

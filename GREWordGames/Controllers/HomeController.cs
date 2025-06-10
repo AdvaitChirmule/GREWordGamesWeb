@@ -13,16 +13,19 @@ using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Numerics;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
 
 namespace GREWordGames.Controllers
 
 {
     public class HomeController : Controller
     {
-        private readonly WordMuseAPI _wordMuseAPI;
-        private readonly CommonFunctions _commonFunctions;
+        private WordMuseAPI _wordMuseAPI;
+        private CommonFunctions _commonFunctions;
         private AllWords _practiceWordOrder;
-        MyWordsFunctions _myWordsFunctions;
+        private MyWordsFunctions _myWordsFunctions;
+        private RoomFunctions _roomFunctions;
+        private GameFunctions _gameFunctions;
 
         private string _token;
         private string _uid;
@@ -42,6 +45,8 @@ namespace GREWordGames.Controllers
             _name = HttpContext.Session.GetString("name");
 
             _myWordsFunctions = new MyWordsFunctions(_token, _uid, HttpContext.Session);
+            _roomFunctions = new RoomFunctions(_token, _uid, HttpContext.Session);
+            _gameFunctions = new GameFunctions(_token, _uid, HttpContext.Session);
             base.OnActionExecuting(context);
         }
 
@@ -79,7 +84,6 @@ namespace GREWordGames.Controllers
                 }
 
                 var model = _myWordsFunctions.PrepareModel(userDetails, ViewBag.Message);
-
                 
                 return View(model);
             }
@@ -312,7 +316,7 @@ namespace GREWordGames.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> HostRoom(string password, int wordCount)
+        public async Task<JsonResult> HostRoom(string password, int rounds, bool exclusive)
         {
             if (string.IsNullOrEmpty(_token) && string.IsNullOrEmpty(_uid))
             {
@@ -320,17 +324,18 @@ namespace GREWordGames.Controllers
             }
             else
             {
-                RoomFunctions roomFunctions = new RoomFunctions(password, _token, _uid, HttpContext.Session);
-                if (roomFunctions.RoomAssigned())
+                RoomFunctions _roomFunctions = new RoomFunctions(password, _token, _uid, HttpContext.Session);
+                if (_roomFunctions.RoomAssigned())
                 {
-                    return Json(new { success = true, message = "You have already created a room", roomNumber = roomFunctions.GetRoomNumber() });
+                    return Json(new { success = true, message = "You have already created a room", roomNumber = _roomFunctions.GetRoomNumber() });
                 }
                 else
                 {
-                    await roomFunctions.SetRoomNumber(password, _name);
-                    if (roomFunctions.RoomAssigned())
+                    await _roomFunctions.SetRoomNumber(password, _name);
+                    if (_roomFunctions.RoomAssigned())
                     {
-                        return Json(new { success = true, message = "Found Room!", roomNumber = roomFunctions.GetRoomNumber() });
+                        _roomFunctions.SetGameRoomDetails(rounds, exclusive);
+                        return Json(new { success = true, message = "Found Room!", roomNumber = _roomFunctions.GetRoomNumber() });
                     }
                     else
                     {
@@ -374,10 +379,11 @@ namespace GREWordGames.Controllers
 
         public async Task<ActionResult> WaitToStart(int roomNumber)
         {
-            RoomFunctions roomFunctions = new RoomFunctions(_token, _uid, HttpContext.Session);
-            bool success = await roomFunctions.WaitToStart(roomNumber);
+            RoomFunctions _roomFunctions = new RoomFunctions(_token, _uid, HttpContext.Session);
+            bool success = await _roomFunctions.WaitToStart(roomNumber);
             if (success)
             {
+                
                 return RedirectToAction("GameRoom");
             }
             else
@@ -388,10 +394,10 @@ namespace GREWordGames.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> StartGame(HostRoomDetails hostRoomDetails)
+        public async Task<ActionResult> StartGame()
         {
             RoomFunctions roomFunctions = new RoomFunctions(_token, _uid, HttpContext.Session);
-            bool success = await roomFunctions.StartGame(hostRoomDetails.Rounds);
+            bool success = await roomFunctions.StartGame();
             if (success)
             {
                 return RedirectToAction("GameRoom");
@@ -399,31 +405,38 @@ namespace GREWordGames.Controllers
             else
             {
                 return RedirectToAction("WaitingRoom");
-
             }
         }
 
-        public async Task<IActionResult> GameRoom()
+        public IActionResult GameRoom()
         {
-            RoomFunctions _roomFunctions = new RoomFunctions(_token, _uid, HttpContext.Session);
-            int roomNumber = _roomFunctions.GetRoomNumber();
-            if (string.IsNullOrEmpty(_token) || string.IsNullOrEmpty(_uid) || roomNumber == -1)
+            if (string.IsNullOrEmpty(_token) || string.IsNullOrEmpty(_uid))
             {
                 return RedirectToAction("Login");
             }
             else
             {
-                List<string> wordList = await _roomFunctions.GetWordList(roomNumber);
-                Debug.WriteLine(wordList);
-
+                if (_roomFunctions.IsValid())
+                {
+                    return RedirectToAction("GameRoom");
+                }
+                else
+                {
+                    return RedirectToAction("WaitingRoom");
+                }
             }
-            return View();
         }
 
         [HttpPost]
         public ActionResult GoToGameRoom()
         {
             return RedirectToAction("GameRoom");
+        }
+
+        public async Task<JsonResult> GetStartTime()
+        {
+            DateTime startTime = await _gameFunctions.GetStartTime();
+            return Json(new { Success = true, DateTime = startTime });
         }
     }
 }

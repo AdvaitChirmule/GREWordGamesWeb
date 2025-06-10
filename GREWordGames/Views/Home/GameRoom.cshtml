@@ -2,5 +2,19 @@
     ViewData["Title"] = "GameRoom";
 }
 
-<h1>Game Room</h1>
 
+<script>
+    $.ajax({
+        url: "GetStartTime",
+        type: "GET"
+    }).done(response => {
+        if (response.success) {
+            console.log(response.DateTime);
+        }
+        else {
+            console.log("No idea");
+        }
+    }).fail(response => {
+        console.log("we died here");
+    });
+</script>

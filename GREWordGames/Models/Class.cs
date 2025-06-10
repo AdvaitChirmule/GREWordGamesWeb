@@ -6,7 +6,7 @@ namespace GREWordGames.Models
         public string Name { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
-        public string PasswordReentered {  get; set; }
+        public string PasswordReentered { get; set; }
 
     }
 
@@ -105,7 +105,7 @@ namespace GREWordGames.Models
         public int Rounds { get; set; } = 0;
         public string WordList { get; set; } = "[]";
 
-        public int StartTime { get; set; }
+        public string StartTime { get; set; }
         public bool StartTimeP2Ack { get; set; } = false;
     }
 }

@@ -131,6 +131,7 @@ namespace GREWordGames.Controllers
         public List<string> ShuffleAndReturnKWords(List<string> words, int k)
         {
             k = Math.Min(k, words.Count);
+            k = Math.Min(k, 16);
 
             HashSet<int> indexSeen = new HashSet<int>();
             Random random = new Random();
@@ -154,24 +155,41 @@ namespace GREWordGames.Controllers
             return result;
         }
 
-        public List<string> FindCommonWordsForNRounds(List<string> wordListHost, List<string> wordListGuest, int rounds)
+        public List<string> FindCommonWordsForNRounds(List<string> wordListHost, List<string> wordListGuest, int rounds, bool overlap)
         {
-            HashSet<string> wordSetHost = new HashSet<string>();
-            for (int i = 0;  i < wordListHost.Count; i++)
-            {
-                wordSetHost.Add(wordListHost[i]);
-            }
-
             List<string> commonWords = new List<string>();
-            for (int i = 0; i < wordListGuest.Count; i++)
+
+            if (overlap)
             {
-                if (wordSetHost.Contains(wordListGuest[i]))
+                HashSet<string> wordSetHost = new HashSet<string>();
+                for (int i = 0; i < wordListHost.Count; i++)
+                {
+                    wordSetHost.Add(wordListHost[i]);
+                }
+
+                for (int i = 0; i < wordListGuest.Count; i++)
+                {
+                    if (wordSetHost.Contains(wordListGuest[i]))
+                    {
+                        commonWords.Add(wordListGuest[i]);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < wordListHost.Count; i++)
+                {
+                    commonWords.Add(wordListHost[i]);
+                }
+
+                for (int i = 0; i < wordListGuest.Count; i++)
                 {
                     commonWords.Add(wordListGuest[i]);
                 }
             }
 
             List<string> commonWordsShuffled = ShuffleAndReturnKWords(commonWords, rounds * 2);
+
             return commonWordsShuffled;
         }
     }
