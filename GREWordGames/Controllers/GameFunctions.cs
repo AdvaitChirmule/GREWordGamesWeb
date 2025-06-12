@@ -31,5 +31,72 @@ namespace GREWordGames.Controllers
             DateTime localTime = TimeZoneInfo.ConvertTimeFromUtc(dateTime, TimeZoneInfo.Local);
             return localTime;
         }
+
+        public async Task<DateTime> GetStartTimeLocal()
+        {
+            int roomNumber = _session.GetInt32("roomNumber") ?? -1;
+            string startTime = await _firebaseGameRoomAPI.GetStartTime(roomNumber);
+            DateTime dateTime = DateTime.Parse(startTime);
+            return dateTime;
+        }
+
+        public int GetRounds()
+        {
+            return _session.GetInt32("Rounds") ?? 5;
+        }
+
+        public bool GetWhetherPlayerFirstTurn()
+        {
+            if (_session.GetInt32("GamePlayer") == 1)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public string GetKthWord(int index)
+        {
+            string commonWordsRaw = _session.GetString("PlayerAllWords");
+            List<string> commonWords = _commonFunctions.ConvertStringToList(commonWordsRaw);
+            if (GetWhetherPlayerFirstTurn())
+            {
+                return commonWords[index * 2];
+            }
+            else
+            {
+                return commonWords[index * 2 + 1];
+            }
+        }
+
+        public bool GuessWord(string word, int index)
+        {
+            string commonWordsRaw = _session.GetString("PlayerAllWords");
+            List<string> commonWords = _commonFunctions.ConvertStringToList(commonWordsRaw);
+            if (GetWhetherPlayerFirstTurn())
+            {
+                if (word == commonWords[index * 2 + 1])
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (word == commonWords[index * 2])
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
     }
 }

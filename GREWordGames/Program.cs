@@ -15,10 +15,6 @@ var firebaseConfig = new FirebaseAuthConfig
     }
 };
 
-builder.Services.AddHangfire(config =>
-    config.UseSqlServerStorage(builder.Configuration.GetConnectionString("MyHangfireDb")));
-builder.Services.AddHangfireServer();
-
 builder.Services.AddSingleton(new FirebaseAuthClient(firebaseConfig));
 
 builder.Services.AddSession();
@@ -28,8 +24,6 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
-
-app.UseHangfireDashboard();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -2,14 +2,57 @@
     ViewData["Title"] = "GameRoom";
 }
 
+<div id="timerDiv"></div>
+<div id="wordPlaceholder"></div>
 
+<label type="form-label" for="guessWord">Guess Word</label>
+<input type="text" class="form-control" id="guessWord" name="guessWord" disabled/>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script>
+    var timer = document.getElementById("timerDiv");
+    var wordPlaceholder = document.getElementById("wordPlaceholder");
+    var inputWord = document.getElementById("guessWord");
+
+    var frameRate = 500;
+    var pauseTime = 5000;
+    var roundTime = 5000;
+
+    var startTime = Date.now();
+
+    var rounds = 0;
+    var roundIndex = 0;
+    var wordIndex = 0;
+    var guessIndex = 0;
+    var playerTurn = false;
+
+    var ticktock = null;
+    var word = "";
+
     $.ajax({
-        url: "GetStartTime",
+        url: "/GetStartDetails",
         type: "GET"
     }).done(response => {
         if (response.success) {
-            console.log(response.DateTime);
+            startTime = Date.parse(response.dateTime);
+            rounds = response.rounds;
+            playerTurn = response.playerTurn;
+
+            ticktock = setInterval(transitionGame, frameRate);
+
+            word = "";
+
+            $.ajax({
+                url: "/GetKthWord",
+                type: "GET",
+                data: { wordIndex: wordIndex }
+            }).done(response => {
+                if (response.success) {
+                    word = response.word;
+                }
+            });
+
+            wordIndex = wordIndex + 1;
         }
         else {
             console.log("No idea");
@@ -17,4 +60,117 @@
     }).fail(response => {
         console.log("we died here");
     });
+
+    function transitionGame() {
+        var diff = (startTime - Date.now());
+        if (diff < 0) {
+            clearInterval(ticktock);
+            startTime = startTime + roundTime;
+            if (playerTurn) {
+                playerTurn = false;
+                ticktock = setInterval(drawWord, frameRate);
+                wordPlaceholder.innerText = word;
+            }
+            else {
+                playerTurn = true;
+                ticktock = setInterval(guessWord, frameRate);
+                inputWord.disabled = false;
+            }
+        }
+        else {
+            timer.innerHTML = "Pause" + (Math.ceil(diff / 1000)).toString();
+        }
+    }
+
+    function guessWord() {
+        var diff = (startTime - Date.now());
+        if (diff < 0) {
+            startTime = startTime + pauseTime;
+            clearInterval(ticktock);
+
+            inputWord.disabled = true;
+
+            guessIndex = guessIndex + 1;
+            if (roundIndex == rounds && guessIndex == rounds) {
+                completeGame();
+            }
+            else {
+                ticktock = setInterval(transitionGame, frameRate);
+            }
+        }
+        else {
+            timer.innerHTML = "Guess" + (Math.ceil(diff / 1000)).toString();
+        }
+    }
+
+    function drawWord() {
+        var diff = (startTime - Date.now());
+        if (diff < 0) {
+            startTime = startTime + pauseTime;
+            clearInterval(ticktock);
+
+            roundIndex = roundIndex + 1;
+
+            if (roundIndex == rounds && guessIndex == rounds) {
+                completeGame();
+            }
+            else {
+                ticktock = setInterval(transitionGame, frameRate);
+                word = "";
+
+                if (wordIndex < rounds) {
+                    $.ajax({
+                        url: "/GetKthWord",
+                        type: "GET",
+                        data: { wordIndex: wordIndex }
+                    }).done(response => {
+                        if (response.success) {
+                            word = response.word;
+                        }
+                    });
+
+                    wordIndex = wordIndex + 1;
+                }
+
+                wordPlaceholder.innerText = "";
+            }
+        }
+        else {
+            timer.innerHTML = "Draw" + (Math.ceil(diff / 1000)).toString();
+        }
+    }
+
+    inputWord.addEventListener('keydown', function (event) {
+        if (event.key == 'Enter') {
+            $.ajax({
+                url: "/GuessWord",
+                type: "GET",
+                data: { word: inputWord.value, guessIndex: guessIndex }
+            }).done(response => {
+                if (response.success) {
+                    if (response.correctWord) {
+                        startTime = startTime + pauseTime;
+                        clearInterval(ticktock);
+
+                        inputWord.disabled = true;
+
+                        guessIndex = guessIndex + 1;
+                        if (roundIndex == rounds && guessIndex == rounds) {
+                            completeGame();
+                        }
+                        else {
+                            ticktock = setInterval(transitionGame, frameRate);
+                        }
+                    }
+                }
+            });
+
+            inputWord.value = "";
+        }
+    });
+
+    function completeGame() {
+        timer.innerHTML = "DONE";
+    }
+
 </script>

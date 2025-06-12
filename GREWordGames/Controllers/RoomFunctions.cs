@@ -13,8 +13,6 @@ namespace GREWordGames.Controllers
         private string _token;
         private string _uid;
 
-        private bool valid = false;
-
         private readonly FirebaseUserAPI _firebaseUserAPI;
         private readonly FirebaseGameRoomAPI _firebaseGameRoomAPI;
         private readonly CommonFunctions _commonFunctions;
@@ -75,10 +73,10 @@ namespace GREWordGames.Controllers
                 rounds = 5;
             }
 
-            _session.SetInt32("rounds", rounds);
+            _session.SetInt32("Rounds", rounds);
             if (exclusive)
             {
-                _session.SetInt32("exclusive", 1);
+                _session.SetInt32("Exclusive", 1);
             }
             else
             {
@@ -135,8 +133,8 @@ namespace GREWordGames.Controllers
 
         public async Task<bool> StartGame()
         {
-            int rounds = _session.GetInt32("rounds") ?? 5;
-            int exclusive = _session.GetInt32("exclusive") ?? 0;
+            int rounds = _session.GetInt32("Rounds") ?? 5;
+            int exclusive = _session.GetInt32("Exclusive") ?? 0;
             bool overlap = false;
             if (exclusive == 1)
             {
@@ -158,14 +156,15 @@ namespace GREWordGames.Controllers
             string commonWordsRaw = _commonFunctions.ConvertListToString(commonWords);
 
             _session.SetInt32("GamePlayer", 1);
-            valid = true;
+            _session.SetInt32("Valid", 1);
+            _session.SetString("PlayerAllWords", commonWordsRaw);
 
             return await _firebaseGameRoomAPI.StartGame(roomNumber, commonWordsRaw, rounds);
         }
 
         public bool IsValid()
         {
-            return valid;
+            return (_session.GetInt32("Valid") ?? 0) == 1;
         }
 
         public async Task<List<string>> GetWordList(int roomNumber)

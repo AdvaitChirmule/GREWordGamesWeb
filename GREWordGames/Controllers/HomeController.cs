@@ -418,7 +418,7 @@ namespace GREWordGames.Controllers
             {
                 if (_roomFunctions.IsValid())
                 {
-                    return RedirectToAction("GameRoom");
+                    return View();
                 }
                 else
                 {
@@ -433,10 +433,32 @@ namespace GREWordGames.Controllers
             return RedirectToAction("GameRoom");
         }
 
-        public async Task<JsonResult> GetStartTime()
+        public async Task<JsonResult> GetStartDetails()
         {
             DateTime startTime = await _gameFunctions.GetStartTime();
-            return Json(new { Success = true, DateTime = startTime });
+            int rounds = _gameFunctions.GetRounds();
+            bool turn = _gameFunctions.GetWhetherPlayerFirstTurn();
+            return Json(new { success = true, dateTime = startTime, rounds = rounds, playerTurn = turn });
+        }
+
+        public JsonResult GetKthWord(int wordIndex)
+        {
+            string word = _gameFunctions.GetKthWord(wordIndex);
+            return Json(new { success = true, word = word });
+        }
+
+        public async Task<JsonResult> GuessWord(string word, int guessIndex)
+        {
+            bool correct = _gameFunctions.GuessWord(word, guessIndex);
+            if (correct)
+            {
+                // await _gameFunctions.RecordCorrectWord(word);
+                return Json(new { success = true, correct = true });
+            }
+            else
+            {
+                return Json(new { success = true, correct = false});
+            }
         }
     }
 }

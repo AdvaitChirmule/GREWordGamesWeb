@@ -107,5 +107,15 @@ namespace GREWordGames.Models
 
         public string StartTime { get; set; }
         public bool StartTimeP2Ack { get; set; } = false;
+        public string d1 { get; set; } = "";
+        public string d2 { get; set; } = "";
+        public string d3 { get; set; } = "";    
+        public string d4 { get; set; } = "";
+        public string d5 { get; set; } = "";
+        public string d6 { get; set; } = "";
+        public string d7 { get; set; } = "";
+        public string d8 { get; set; } = "";
+        public string d9 { get; set; } = "";
+        public string d10 { get; set; } = "";
     }
 }

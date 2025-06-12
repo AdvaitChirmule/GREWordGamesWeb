@@ -168,5 +168,24 @@ namespace GREWordGames.Controllers
             string startTime = await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("StartTime").OnceSingleAsync<string>();
             return startTime;
         }
+
+        public async Task<int> GetRounds(int roomNumber)
+        {
+            int rounds = await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("Rounds").OnceSingleAsync<int>();
+            return rounds;
+        }
+
+        public async Task<bool> GetWhetherPlayerFirstTurn(int roomNumber)
+        {
+            string guestUid = await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("Player2Uid").OnceSingleAsync<string>();
+            if (_uid == guestUid)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
     }
 }
