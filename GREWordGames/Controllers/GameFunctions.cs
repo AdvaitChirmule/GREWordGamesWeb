@@ -1,4 +1,5 @@
-﻿using GREWordGames.Models;
+﻿using System.Diagnostics;
+using GREWordGames.Models;
 
 namespace GREWordGames.Controllers
 {
@@ -96,6 +97,48 @@ namespace GREWordGames.Controllers
                 {
                     return false;
                 }
+            }
+        }
+
+        public async Task RecordCorrectWord(int index, int saveTime)
+        {
+            int gameIndex = 0;
+            int roomNumber = _session.GetInt32("roomNumber") ?? -1;
+            if (GetWhetherPlayerFirstTurn())
+            {
+                gameIndex = index * 2 + 1;
+            }
+            else
+            {
+                gameIndex = index * 2;
+            }
+            
+            await _firebaseGameRoomAPI.RecordKthWord(roomNumber, gameIndex, saveTime);
+        }
+
+        public async Task<(bool, int)> CorrectlyGuessedWord(int index)
+        {
+            int gameIndex = 0;
+            int roomNumber = _session.GetInt32("roomNumber") ?? -1;
+            if (GetWhetherPlayerFirstTurn())
+            {
+                gameIndex = index * 2 + 1;
+            }
+            else
+            {
+                gameIndex = index * 2;
+            }
+            SaveRecord saveRecord = await _firebaseGameRoomAPI.GetSaveRecord(roomNumber);
+            Debug.WriteLine(saveRecord.index);
+            Debug.WriteLine(gameIndex);
+            if (saveRecord.index == gameIndex)
+            {
+                Debug.WriteLine("now what");
+                return (true, saveRecord.value);
+            }
+            else
+            {
+                return (false, 0);
             }
         }
     }

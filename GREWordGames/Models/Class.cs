@@ -107,6 +107,8 @@ namespace GREWordGames.Models
 
         public string StartTime { get; set; }
         public bool StartTimeP2Ack { get; set; } = false;
+
+        public SaveRecord SaveRecord { get; set; } = new SaveRecord { index = -1, value = 0 };
         public string d1 { get; set; } = "";
         public string d2 { get; set; } = "";
         public string d3 { get; set; } = "";    
@@ -117,5 +119,11 @@ namespace GREWordGames.Models
         public string d8 { get; set; } = "";
         public string d9 { get; set; } = "";
         public string d10 { get; set; } = "";
+    }
+
+    public class SaveRecord
+    {
+        public int index { get; set; }
+        public int value { get; set; }
     }
 }

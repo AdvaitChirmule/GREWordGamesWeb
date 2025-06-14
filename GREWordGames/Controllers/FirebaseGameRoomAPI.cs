@@ -138,7 +138,7 @@ namespace GREWordGames.Controllers
                     return true;
                 }
                 checkTimer = checkTimer + 1;
-                if (checkTimer % 5 == 0)
+                if (checkTimer % 10 == 0)
                 {
                     bool stillExists = await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("Occupied").OnceSingleAsync<bool>();
                     if (!stillExists)
@@ -147,7 +147,7 @@ namespace GREWordGames.Controllers
                     }
                 }
 
-                await Task.Delay(1000);
+                await Task.Delay(500);
             }
         }
 
@@ -186,6 +186,17 @@ namespace GREWordGames.Controllers
             {
                 return true;
             }
+        }
+
+        public async Task RecordKthWord(int roomNumber, int gameIndex, int saveTime)
+        {
+            SaveRecord saveRecord = new SaveRecord { index = gameIndex, value = saveTime };
+            await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("SaveRecord").PutAsync(saveRecord);
+        }
+
+        public async Task<SaveRecord> GetSaveRecord(int roomNumber)
+        {
+            return await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("SaveRecord").OnceSingleAsync<SaveRecord>();
         }
     }
 }

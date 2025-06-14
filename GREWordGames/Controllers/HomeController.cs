@@ -447,17 +447,31 @@ namespace GREWordGames.Controllers
             return Json(new { success = true, word = word });
         }
 
-        public async Task<JsonResult> GuessWord(string word, int guessIndex)
+        public async Task<JsonResult> GuessWord(string word, int guessIndex, int saveTime)
         {
             bool correct = _gameFunctions.GuessWord(word, guessIndex);
             if (correct)
             {
-                // await _gameFunctions.RecordCorrectWord(word);
+                await _gameFunctions.RecordCorrectWord(guessIndex, saveTime);
                 return Json(new { success = true, correct = true });
             }
             else
             {
                 return Json(new { success = true, correct = false});
+            }
+        }
+
+        public async Task<JsonResult> CorrectlyGuessedWord(int wordIndex)
+        {
+            (bool correct, int saveTime) = await _gameFunctions.CorrectlyGuessedWord(wordIndex);
+            if (correct)
+            {
+                Debug.WriteLine("I am sending!!");
+                return Json(new {success = true, saveTime = saveTime});
+            }
+            else
+            {
+                return Json(new { success = false, saveTime = 0 });
             }
         }
     }

@@ -16,7 +16,7 @@
 
     var frameRate = 500;
     var pauseTime = 5000;
-    var roundTime = 5000;
+    var roundTime = 30000;
 
     var startTime = Date.now();
 
@@ -137,19 +137,57 @@
         }
         else {
             timer.innerHTML = "Draw" + (Math.ceil(diff / 1000)).toString();
+            $.ajax({
+                url: "/CorrectlyGuessedWord",
+                type: "GET",
+                data: { wordIndex: wordIndex-1 }
+            }).done(response => {
+                if (response.success) {
+                    var saveTime = response.saveTime;
+                    startTime = startTime + pauseTime - saveTime * 1000;
+                    clearInterval(ticktock);
+
+                    roundIndex = roundIndex + 1;
+
+                    if (roundIndex == rounds && guessIndex == rounds) {
+                        completeGame();
+                    }
+                    else {
+                        ticktock = setInterval(transitionGame, frameRate);
+                        word = "";
+
+                        if (wordIndex < rounds) {
+                            $.ajax({
+                                url: "/GetKthWord",
+                                type: "GET",
+                                data: { wordIndex: wordIndex }
+                            }).done(response => {
+                                if (response.success) {
+                                    word = response.word;
+                                }
+                            });
+
+                            wordIndex = wordIndex + 1;
+                        }
+
+                        wordPlaceholder.innerText = "";
+                    }
+                }
+            });
         }
     }
 
     inputWord.addEventListener('keydown', function (event) {
         if (event.key == 'Enter') {
+            var saveTime = Math.floor((startTime - Date.now()) / 1000) - 3;
             $.ajax({
                 url: "/GuessWord",
                 type: "GET",
-                data: { word: inputWord.value, guessIndex: guessIndex }
+                data: { word: inputWord.value, guessIndex: guessIndex, saveTime: saveTime }
             }).done(response => {
                 if (response.success) {
-                    if (response.correctWord) {
-                        startTime = startTime + pauseTime;
+                    if (response.correct) {
+                        startTime = startTime + pauseTime - saveTime * 1000;
                         clearInterval(ticktock);
 
                         inputWord.disabled = true;
