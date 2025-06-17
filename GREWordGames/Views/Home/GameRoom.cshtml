@@ -6,6 +6,7 @@
 <div id="wordPlaceholder"></div>
 
 <label type="form-label" for="guessWord">Guess Word</label>
+<canvas height="300" width="300" id="whiteBoard" class="bg-white"></canvas>
 <input type="text" class="form-control" id="guessWord" name="guessWord" disabled/>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
@@ -13,21 +14,35 @@
     var timer = document.getElementById("timerDiv");
     var wordPlaceholder = document.getElementById("wordPlaceholder");
     var inputWord = document.getElementById("guessWord");
+    var whiteBoard = document.getElementById("whiteBoard");
+    const ctx = whiteBoard.getContext('2d');
 
-    var frameRate = 500;
+    var frameRate = 1000;
     var pauseTime = 5000;
     var roundTime = 30000;
 
     var startTime = Date.now();
 
+    var drawTime = false;
+    var isDrawing = false;
+
     var rounds = 0;
-    var roundIndex = 0;
-    var wordIndex = 0;
+    var drawIndex = 0;
     var guessIndex = 0;
     var playerTurn = false;
 
     var ticktock = null;
     var word = "";
+
+    var drawTrue = [];
+    var drawString = [];
+
+    var totalFrames = Math.ceil(roundTime / frameRate);
+
+    for (var i = 0; i < totalFrames ; i++) {
+        drawTrue.push(false);
+        drawString.push("");
+    }
 
     $.ajax({
         url: "/GetStartDetails",
@@ -45,20 +60,13 @@
             $.ajax({
                 url: "/GetKthWord",
                 type: "GET",
-                data: { wordIndex: wordIndex }
+                data: { drawIndex: drawIndex }
             }).done(response => {
                 if (response.success) {
                     word = response.word;
                 }
             });
-
-            wordIndex = wordIndex + 1;
         }
-        else {
-            console.log("No idea");
-        }
-    }).fail(response => {
-        console.log("we died here");
     });
 
     function transitionGame() {
@@ -68,7 +76,13 @@
             startTime = startTime + roundTime;
             if (playerTurn) {
                 playerTurn = false;
+                drawTime = true;
                 ticktock = setInterval(drawWord, frameRate);
+                isDrawing = false;
+                for (var i = 0; i < totalFrames; i++) {
+                    drawTrue[i] = false;
+                    drawString[i] = "";
+                }
                 wordPlaceholder.innerText = word;
             }
             else {
@@ -91,7 +105,7 @@
             inputWord.disabled = true;
 
             guessIndex = guessIndex + 1;
-            if (roundIndex == rounds && guessIndex == rounds) {
+            if (drawIndex == rounds && guessIndex == rounds) {
                 completeGame();
             }
             else {
@@ -107,29 +121,29 @@
         var diff = (startTime - Date.now());
         if (diff < 0) {
             startTime = startTime + pauseTime;
+            drawTime = false;
+            ctx.clearRect(0, 0, whiteBoard.width, whiteBoard.height);
+            isDrawing = false;
             clearInterval(ticktock);
 
-            roundIndex = roundIndex + 1;
-
-            if (roundIndex == rounds && guessIndex == rounds) {
+            drawIndex = drawIndex + 1;
+            if (drawIndex == rounds && guessIndex == rounds) {
                 completeGame();
             }
             else {
                 ticktock = setInterval(transitionGame, frameRate);
                 word = "";
 
-                if (wordIndex < rounds) {
+                if (drawIndex < rounds) {
                     $.ajax({
                         url: "/GetKthWord",
                         type: "GET",
-                        data: { wordIndex: wordIndex }
+                        data: { drawIndex: drawIndex }
                     }).done(response => {
                         if (response.success) {
                             word = response.word;
                         }
                     });
-
-                    wordIndex = wordIndex + 1;
                 }
 
                 wordPlaceholder.innerText = "";
@@ -137,37 +151,39 @@
         }
         else {
             timer.innerHTML = "Draw" + (Math.ceil(diff / 1000)).toString();
+            var ithFrame = Math.floor((roundTime + Date.now() - startTime) / frameRate);
+
             $.ajax({
                 url: "/CorrectlyGuessedWord",
                 type: "GET",
-                data: { wordIndex: wordIndex-1 }
+                data: { drawIndex: drawIndex }
             }).done(response => {
                 if (response.success) {
                     var saveTime = response.saveTime;
                     startTime = startTime + pauseTime - saveTime * 1000;
+                    drawTime = false;
+                    ctx.clearRect(0, 0, whiteBoard.width, whiteBoard.height);
+
                     clearInterval(ticktock);
 
-                    roundIndex = roundIndex + 1;
-
-                    if (roundIndex == rounds && guessIndex == rounds) {
+                    drawIndex = drawIndex + 1;
+                    if (drawIndex == rounds && guessIndex == rounds) {
                         completeGame();
                     }
                     else {
                         ticktock = setInterval(transitionGame, frameRate);
                         word = "";
 
-                        if (wordIndex < rounds) {
+                        if (drawIndex < rounds) {
                             $.ajax({
                                 url: "/GetKthWord",
                                 type: "GET",
-                                data: { wordIndex: wordIndex }
+                                data: { drawIndex: drawIndex }
                             }).done(response => {
                                 if (response.success) {
                                     word = response.word;
                                 }
                             });
-
-                            wordIndex = wordIndex + 1;
                         }
 
                         wordPlaceholder.innerText = "";
@@ -193,7 +209,7 @@
                         inputWord.disabled = true;
 
                         guessIndex = guessIndex + 1;
-                        if (roundIndex == rounds && guessIndex == rounds) {
+                        if (drawIndex == rounds && guessIndex == rounds) {
                             completeGame();
                         }
                         else {
@@ -206,6 +222,48 @@
             inputWord.value = "";
         }
     });
+
+    var startX = 0;
+    var startY = 0;
+
+    whiteBoard.addEventListener('mousedown', function (e) {
+        if (drawTime){
+            isDrawing = true;
+            startX = e.offsetX;
+            startY = e.offsetY;
+        }
+    })
+
+    whiteBoard.addEventListener('mousemove', function (e) {
+        if (isDrawing) {
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            var ithFrame = Math.floor((roundTime + Date.now() - startTime) / frameRate);
+            if (ithFrame >= 0 && ithFrame < totalFrames) {
+                if (ithFrame > 0 && drawTrue[ithFrame - 1] == false) {
+                    $.ajax({
+                        url: "/RecordIthFrameDrawing",
+                        data: { drawIndex: drawIndex, frameIndex: ithFrame, drawing: drawString[ithFrame - 1] }
+                    })
+                    drawTrue[ithFrame - 1] = true;
+                }
+                
+                drawString[ithFrame] = drawString[ithFrame] + ";" + startX.toString() + "|" + startY.toString() + "|" + e.offsetX.toString() + "|" + e.offsetY.toString();
+
+            }            
+
+            startX = e.offsetX;
+            startY = e.offsetY;
+        }
+    })
+
+    whiteBoard.addEventListener('mouseup', () => isDrawing = false);
+    whiteBoard.addEventListener('mouseout', () => isDrawing = false);
+
 
     function completeGame() {
         timer.innerHTML = "DONE";

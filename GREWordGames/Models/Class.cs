@@ -108,22 +108,49 @@ namespace GREWordGames.Models
         public string StartTime { get; set; }
         public bool StartTimeP2Ack { get; set; } = false;
 
-        public SaveRecord SaveRecord { get; set; } = new SaveRecord { index = -1, value = 0 };
-        public string d1 { get; set; } = "";
-        public string d2 { get; set; } = "";
-        public string d3 { get; set; } = "";    
-        public string d4 { get; set; } = "";
-        public string d5 { get; set; } = "";
-        public string d6 { get; set; } = "";
-        public string d7 { get; set; } = "";
-        public string d8 { get; set; } = "";
-        public string d9 { get; set; } = "";
-        public string d10 { get; set; } = "";
+        public SaveRecord SaveRecord { get; set; } = new SaveRecord { Index = -1, Value = 0 };
+        public DrawClass D1 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D2 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D3 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D4 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D5 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D6 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D7 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D8 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D9 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D10 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D11 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D12 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D13 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D14 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D15 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D16 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D17 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D18 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D19 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D20 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D21 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D22 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D23 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D24 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D25 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D26 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D27 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D28 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D29 { get; set; } = new DrawClass { Index = -1, Value = "" };
+        public DrawClass D30 { get; set; } = new DrawClass { Index = -1, Value = "" };
+
     }
 
     public class SaveRecord
     {
-        public int index { get; set; }
-        public int value { get; set; }
+        public int Index { get; set; }
+        public int Value { get; set; }
+    }
+
+    public class DrawClass
+    {
+        public int Index { get; set; }
+        public string Value { get; set; }
     }
 }

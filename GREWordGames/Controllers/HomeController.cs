@@ -441,9 +441,9 @@ namespace GREWordGames.Controllers
             return Json(new { success = true, dateTime = startTime, rounds = rounds, playerTurn = turn });
         }
 
-        public JsonResult GetKthWord(int wordIndex)
+        public JsonResult GetKthWord(int drawIndex)
         {
-            string word = _gameFunctions.GetKthWord(wordIndex);
+            string word = _gameFunctions.GetKthWord(drawIndex);
             return Json(new { success = true, word = word });
         }
 
@@ -461,17 +461,38 @@ namespace GREWordGames.Controllers
             }
         }
 
-        public async Task<JsonResult> CorrectlyGuessedWord(int wordIndex)
+        public async Task<JsonResult> CorrectlyGuessedWord(int drawIndex)
         {
-            (bool correct, int saveTime) = await _gameFunctions.CorrectlyGuessedWord(wordIndex);
+            (bool correct, int saveTime) = await _gameFunctions.CorrectlyGuessedWord(drawIndex);
             if (correct)
             {
-                Debug.WriteLine("I am sending!!");
                 return Json(new {success = true, saveTime = saveTime});
             }
             else
             {
                 return Json(new { success = false, saveTime = 0 });
+            }
+        }
+
+        public async Task RecordIthFrameDrawing(int drawIndex, int frameIndex, string drawing)
+        {
+            Debug.WriteLine("new line");
+            Debug.WriteLine(drawIndex);
+            Debug.WriteLine(frameIndex);
+            Debug.WriteLine(drawing);
+            await _gameFunctions.RecordIthFrameDrawing(drawIndex, frameIndex, drawing);
+        }
+
+        public async Task<JsonResult> GetIthFrameDrawing(int drawIndex, int frameIndex)
+        {
+            (bool success, string drawing) = await _gameFunctions.GetIthFrameDrawing(drawIndex, frameIndex);
+            if (success)
+            {
+                return Json(new {success = true, drawing = drawing});
+            }
+            else
+            {
+                return Json(new { success = false, drawing = "" });
             }
         }
     }

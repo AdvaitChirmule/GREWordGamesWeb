@@ -1,6 +1,7 @@
 ﻿using Firebase.Database;
 using Firebase.Database.Query;
 using GREWordGames.Models;
+using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
 
 namespace GREWordGames.Controllers
 {
@@ -190,13 +191,28 @@ namespace GREWordGames.Controllers
 
         public async Task RecordKthWord(int roomNumber, int gameIndex, int saveTime)
         {
-            SaveRecord saveRecord = new SaveRecord { index = gameIndex, value = saveTime };
+            SaveRecord saveRecord = new SaveRecord { Index = gameIndex, Value = saveTime };
             await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("SaveRecord").PutAsync(saveRecord);
         }
 
         public async Task<SaveRecord> GetSaveRecord(int roomNumber)
         {
             return await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("SaveRecord").OnceSingleAsync<SaveRecord>();
+        }
+
+        public async Task RecordIthFrameDrawing(int roomNumber, int gameIndex, int frameIndex, string drawing)
+        {
+            string className = "D" + frameIndex.ToString();
+            DrawClass drawClass = await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child(className).OnceSingleAsync<DrawClass>();
+            drawClass.Index = gameIndex;
+            drawClass.Value = drawing;
+            await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child(className).PutAsync(drawClass);
+        }
+
+        public async Task<DrawClass> GetIthFrameDrawing(int roomNumber, int frameIndex)
+        {
+            string className = "D" + frameIndex.ToString();
+            return await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child(className).OnceSingleAsync<DrawClass>();
         }
     }
 }

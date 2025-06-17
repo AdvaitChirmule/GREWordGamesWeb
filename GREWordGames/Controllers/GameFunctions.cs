@@ -122,23 +122,61 @@ namespace GREWordGames.Controllers
             int roomNumber = _session.GetInt32("roomNumber") ?? -1;
             if (GetWhetherPlayerFirstTurn())
             {
-                gameIndex = index * 2 + 1;
+                gameIndex = index * 2;
             }
             else
             {
-                gameIndex = index * 2;
+                gameIndex = index * 2 + 1;
             }
             SaveRecord saveRecord = await _firebaseGameRoomAPI.GetSaveRecord(roomNumber);
-            Debug.WriteLine(saveRecord.index);
-            Debug.WriteLine(gameIndex);
-            if (saveRecord.index == gameIndex)
+            if (saveRecord.Index == gameIndex)
             {
                 Debug.WriteLine("now what");
-                return (true, saveRecord.value);
+                return (true, saveRecord.Value);
             }
             else
             {
                 return (false, 0);
+            }
+        }
+
+        public async Task RecordIthFrameDrawing(int drawIndex, int frameIndex, string drawing)
+        {
+            int gameIndex = 0;
+            int roomNumber = _session.GetInt32("roomNumber") ?? -1;
+            if (GetWhetherPlayerFirstTurn())
+            {
+                gameIndex = drawIndex * 2;
+            }
+            else
+            {
+                gameIndex = drawIndex * 2 + 1;
+            }
+
+            await _firebaseGameRoomAPI.RecordIthFrameDrawing(roomNumber, gameIndex, frameIndex, drawing);
+        }
+
+        public async Task<(bool, string)> GetIthFrameDrawing(int drawIndex, int frameIndex)
+        {
+            int gameIndex = 0;
+            int roomNumber = _session.GetInt32("roomNumber") ?? -1;
+            if (GetWhetherPlayerFirstTurn())
+            {
+                gameIndex = drawIndex * 2;
+            }
+            else
+            {
+                gameIndex = drawIndex * 2 + 1;
+            }
+
+            DrawClass drawClass = await _firebaseGameRoomAPI.GetIthFrameDrawing(roomNumber, frameIndex);
+            if (drawClass.Index == gameIndex)
+            {
+                return (true, drawClass.Value);
+            }
+            else
+            {
+                return (false, "");
             }
         }
     }
