@@ -476,10 +476,6 @@ namespace GREWordGames.Controllers
 
         public async Task RecordIthFrameDrawing(int drawIndex, int frameIndex, string drawing)
         {
-            Debug.WriteLine("new line");
-            Debug.WriteLine(drawIndex);
-            Debug.WriteLine(frameIndex);
-            Debug.WriteLine(drawing);
             await _gameFunctions.RecordIthFrameDrawing(drawIndex, frameIndex, drawing);
         }
 
