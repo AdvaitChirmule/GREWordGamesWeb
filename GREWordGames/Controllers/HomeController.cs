@@ -376,14 +376,13 @@ namespace GREWordGames.Controllers
             }
         }
 
-
+        [HttpPost]
         public async Task<ActionResult> WaitToStart(int roomNumber)
         {
             RoomFunctions _roomFunctions = new RoomFunctions(_token, _uid, HttpContext.Session);
             bool success = await _roomFunctions.WaitToStart(roomNumber);
             if (success)
             {
-                
                 return RedirectToAction("GameRoom");
             }
             else
@@ -479,9 +478,9 @@ namespace GREWordGames.Controllers
             await _gameFunctions.RecordIthFrameDrawing(drawIndex, frameIndex, drawing);
         }
 
-        public async Task<JsonResult> GetIthFrameDrawing(int drawIndex, int frameIndex)
+        public async Task<JsonResult> GetIthFrameDrawing(int guessIndex, int frameIndex)
         {
-            (bool success, string drawing) = await _gameFunctions.GetIthFrameDrawing(drawIndex, frameIndex);
+            (bool success, string drawing) = await _gameFunctions.GetIthFrameDrawing(guessIndex, frameIndex);
             if (success)
             {
                 return Json(new {success = true, drawing = drawing});

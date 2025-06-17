@@ -29,6 +29,12 @@
                     
                     <div id="displayStartButton"></div>
                 }
+
+                @using (Html.BeginForm("WaitToStart", "Home", FormMethod.Post, new { id = "waitToStartForm" }))
+                {
+                    <div id="guestStart"></div>
+                    <input type="hidden" name="roomNumber" />
+                }
             </div>
             <div class="col-sm-2">
                 or
@@ -120,20 +126,8 @@
     function waitToStart(roomNumber) {
         var messageBar = document.getElementById("messageBar");
 
-        $.ajax({
-            url: "/WaitToStart",
-            type: "POST",
-            data: { roomNumber: roomNumber }
-        }).done(response => {
-            if (response.success) {
-                messageBar.innerHTML = "Redirecting to Game Room!"
-            }
-            else {
-                messageBar.innerHTML = "Unexpected Error Occured";
-            }
-        }).fail(response => {
-            messageBar.innerHTML = "Unexpected Error Occured";
-        });
+        document.querySelector('input[name="roomNumber"]').value = roomNumber;
+        document.getElementById('waitToStartForm').submit();
     }
 
 </script>

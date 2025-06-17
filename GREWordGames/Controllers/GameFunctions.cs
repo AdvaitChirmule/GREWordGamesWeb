@@ -131,7 +131,6 @@ namespace GREWordGames.Controllers
             SaveRecord saveRecord = await _firebaseGameRoomAPI.GetSaveRecord(roomNumber);
             if (saveRecord.Index == gameIndex)
             {
-                Debug.WriteLine("now what");
                 return (true, saveRecord.Value);
             }
             else
@@ -156,21 +155,21 @@ namespace GREWordGames.Controllers
             await _firebaseGameRoomAPI.RecordIthFrameDrawing(roomNumber, gameIndex, frameIndex, drawing);
         }
 
-        public async Task<(bool, string)> GetIthFrameDrawing(int drawIndex, int frameIndex)
+        public async Task<(bool, string)> GetIthFrameDrawing(int guessIndex, int frameIndex)
         {
             int gameIndex = 0;
             int roomNumber = _session.GetInt32("roomNumber") ?? -1;
             if (GetWhetherPlayerFirstTurn())
             {
-                gameIndex = drawIndex * 2;
+                gameIndex = guessIndex * 2 + 1;
             }
             else
             {
-                gameIndex = drawIndex * 2 + 1;
+                gameIndex = guessIndex * 2;
             }
 
             DrawClass drawClass = await _firebaseGameRoomAPI.GetIthFrameDrawing(roomNumber, frameIndex);
-            if (drawClass.Index == gameIndex)
+            if (drawClass != null && drawClass.Index == gameIndex)
             {
                 return (true, drawClass.Value);
             }

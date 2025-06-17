@@ -50,9 +50,9 @@ namespace GREWordGames.Controllers
             return wordList;
         }
 
-        public async Task<string> GetUserWordList(string uid)
+        public async Task<string> GetGuestUserWordList(int roomNumber)
         {
-            string wordList = await _firebaseClient.Child("metadata").Child(uid).Child("words").OnceSingleAsync<string>();
+            string wordList = await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("Player2WordList").OnceSingleAsync<string>();
             return wordList;
         }
 

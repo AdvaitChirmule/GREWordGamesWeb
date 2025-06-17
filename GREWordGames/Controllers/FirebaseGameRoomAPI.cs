@@ -1,4 +1,5 @@
-﻿using Firebase.Database;
+﻿using System.Diagnostics;
+using Firebase.Database;
 using Firebase.Database.Query;
 using GREWordGames.Models;
 using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore;
@@ -73,9 +74,9 @@ namespace GREWordGames.Controllers
                         FirebaseRoomDetails gameRoom = await _firebaseClient.Child("rooms").Child(room.ToString()).OnceSingleAsync<FirebaseRoomDetails>();
                         gameRoom.Player2JoinFlag = true;
                         gameRoom.Player2 = name2;
-                        gameRoom.Player2Uid = uid2;
+                        gameRoom.Player2WordList = await _firebaseClient.Child("metadata").Child(uid2).Child("words").OnceSingleAsync<string>();
                         await _firebaseClient.Child("rooms").Child(room.ToString()).PutAsync(gameRoom);
-                        return (true, "All Good");
+                        return (true, "All Good. Waiting for host to start the game.");
                     }
                     else
                     {
@@ -128,7 +129,7 @@ namespace GREWordGames.Controllers
             return true;
         }
 
-        public async Task<bool> WaitToStart(int roomNumber)
+        public async Task<(bool, string)> WaitToStart(int roomNumber)
         {
             int checkTimer = 0;
             while (true)
@@ -136,7 +137,8 @@ namespace GREWordGames.Controllers
                 bool start = await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("StartFlag").OnceSingleAsync<bool>();
                 if (start)
                 {
-                    return true;
+                    string commonWordsRaw = await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("WordList").OnceSingleAsync<string>();
+                    return (true, commonWordsRaw);
                 }
                 checkTimer = checkTimer + 1;
                 if (checkTimer % 10 == 0)
@@ -144,18 +146,12 @@ namespace GREWordGames.Controllers
                     bool stillExists = await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("Occupied").OnceSingleAsync<bool>();
                     if (!stillExists)
                     {
-                        return false;
+                        return (false, "");
                     }
                 }
 
                 await Task.Delay(500);
             }
-        }
-
-        public async Task<string> GetGuestUID(int roomNumber)
-        {
-            string guestUid = await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("Player2Uid").OnceSingleAsync<string>();
-            return guestUid;
         }
 
         public async Task<string> GetGameWords(int roomNumber)

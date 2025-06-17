@@ -128,7 +128,19 @@ namespace GREWordGames.Controllers
 
         public async Task<bool> WaitToStart(int roomNumber)
         {
-            return await _firebaseGameRoomAPI.WaitToStart(roomNumber);
+            (bool success, string commonWordsRaw) = await _firebaseGameRoomAPI.WaitToStart(roomNumber);
+            if (success)
+            {
+                _session.SetInt32("roomNumber", roomNumber);
+                _session.SetInt32("GamePlayer", 2);
+                _session.SetInt32("Valid", 1);
+                _session.SetString("PlayerAllWords", commonWordsRaw);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public async Task<bool> StartGame()
@@ -144,9 +156,7 @@ namespace GREWordGames.Controllers
             int roomNumber = GetRoomNumber();
 
             string wordListHostRaw = await _firebaseUserAPI.GetUserWordList();
-
-            string guestUid = await _firebaseGameRoomAPI.GetGuestUID(roomNumber);
-            string wordListGuestRaw = await _firebaseUserAPI.GetUserWordList(guestUid);
+            string wordListGuestRaw = await _firebaseUserAPI.GetGuestUserWordList(roomNumber);
 
             List<string> wordListHost = _commonFunctions.ConvertStringToList(wordListHostRaw);
             List<string> wordListGuest = _commonFunctions.ConvertStringToList(wordListGuestRaw);

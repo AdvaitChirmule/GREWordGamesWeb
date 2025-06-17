@@ -101,7 +101,7 @@ namespace GREWordGames.Models
         public string Password { get; set; } = "";
         public string Player1 { get; set; } = "";
         public string Player2 { get; set; } = "";
-        public string Player2Uid { get; set; } = "";
+        public string Player2WordList { get; set; } = "";
         public int Rounds { get; set; } = 0;
         public string WordList { get; set; } = "[]";
 
@@ -109,6 +109,7 @@ namespace GREWordGames.Models
         public bool StartTimeP2Ack { get; set; } = false;
 
         public SaveRecord SaveRecord { get; set; } = new SaveRecord { Index = -1, Value = 0 };
+        public DrawClass D0 { get; set; } = new DrawClass { Index = -1, Value = "" };
         public DrawClass D1 { get; set; } = new DrawClass { Index = -1, Value = "" };
         public DrawClass D2 { get; set; } = new DrawClass { Index = -1, Value = "" };
         public DrawClass D3 { get; set; } = new DrawClass { Index = -1, Value = "" };
