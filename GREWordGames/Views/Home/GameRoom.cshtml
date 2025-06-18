@@ -17,6 +17,9 @@
     var whiteBoard = document.getElementById("whiteBoard");
     const ctx = whiteBoard.getContext('2d');
 
+    var startX = 0;
+    var startY = 0;
+
     var frameRate = 1000;
     var pauseTime = 5000;
     var roundTime = 30000;
@@ -34,16 +37,17 @@
     var ticktock = null;
     var word = "";
 
+    var totalFrames = Math.ceil(roundTime / frameRate);
+
+
     var drawTrue = [];
     var drawString = [];
-
-    var totalFrames = Math.ceil(roundTime / frameRate);
 
     var lastFrame = 0;
 
     for (var i = 0; i < totalFrames ; i++) {
         drawTrue.push(false);
-        drawString.push("");
+        drawString.push(";");
     }
 
     $.ajax({
@@ -72,7 +76,20 @@
     });
 
     function transitionGame() {
-        var diff = (startTime - Date.now());
+        diff = (startTime - Date.now());
+
+        ctx.clearRect(0, 0, whiteBoard.width, whiteBoard.height);
+
+        drawTrue = [];
+        drawString = [];
+
+        lastFrame = 0;
+
+        for (var i = 0; i < totalFrames; i++) {
+            drawTrue.push(false);
+            drawString.push(";");
+        }
+
         if (diff < 0) {
             clearInterval(ticktock);
             startTime = startTime + roundTime;
@@ -81,10 +98,7 @@
                 drawTime = true;
                 ticktock = setInterval(drawWord, frameRate);
                 isDrawing = false;
-                for (var i = 0; i < totalFrames; i++) {
-                    drawTrue[i] = false;
-                    drawString[i] = "";
-                }
+
                 wordPlaceholder.innerText = word;
             }
             else {
@@ -108,6 +122,7 @@
 
             guessIndex = guessIndex + 1;
             ctx.clearRect(0, 0, whiteBoard.width, whiteBoard.height);
+            
             if (drawIndex == rounds && guessIndex == rounds) {
                 completeGame();
             }
@@ -119,34 +134,34 @@
             timer.innerHTML = "Guess" + (Math.ceil(diff / 1000)).toString();
 
             var completeReading = false;
-            while (lastFrame < totalFrames) {
-                if (completeReading){
-                    break;
+            callFrame()
+            
+        }
+    }
+
+    function callFrame() {
+        $.ajax({
+            url: "/GetIthFrameDrawing",
+            type: "GET",
+            data: { guessIndex: guessIndex, frameIndex: lastFrame }
+        }).done(response => {
+            if (response.success) {
+                if (response.drawing && response.drawing != "") {
+                    var strokeList = response.drawing.split(';');
+                    for (let i = 1; i < (strokeList.length - 1); i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(parseInt(strokeList[i].slice(0, 2), 16), parseInt(strokeList[i].slice(2, 4), 16));
+                        ctx.lineTo(parseInt(strokeList[i].slice(4, 6), 16), parseInt(strokeList[i].slice(6, 8), 16));
+                        ctx.strokeStyle = 'black';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
                 }
 
-                $.ajax({
-                    url: "/GetIthFrameDrawing",
-                    type: "GET",
-                    data: { guessIndex: guessIndex, frameIndex: lastFrame}
-                }).done(response => {
-                    if (response.success) {
-                        var strokeList = response.drawing.Split(';');
-                        for (let i = 1; i < strokeList.Count; i++) {
-                            var strokes = strokeList[i].Split("|");
-                            ctx.moveTo(strokes[0], strokes[1]);
-                            ctx.lineTo(strokes[2], strokes[3]);
-                        }
-
-                        lastFrame = lastFrame + 1;
-                    }
-                    else {
-                        completeReading = true;
-                    }
-                }).fail(response => {
-                    completeReading = true;
-                });
+                lastFrame = lastFrame + 1;
+                callFrame();
             }
-        }
+        })
     }
 
     function drawWord() {
@@ -221,6 +236,17 @@
                     }
                 }
             });
+
+            var ithFrame = Math.floor((roundTime + Date.now() - startTime) / frameRate);
+            for (let i = 0; i < ithFrame; i++){
+                if (drawTrue[i] == false) {
+                    $.ajax({
+                        url: "/RecordIthFrameDrawing",
+                        data: { drawIndex: drawIndex, frameIndex: i, drawing: drawString[i] }
+                    })
+                    drawTrue[i] = true;
+                }
+            }
         }
     }
 
@@ -254,9 +280,6 @@
         }
     });
 
-    var startX = 0;
-    var startY = 0;
-
     whiteBoard.addEventListener('mousedown', function (e) {
         if (drawTime){
             isDrawing = true;
@@ -267,6 +290,7 @@
 
     whiteBoard.addEventListener('mousemove', function (e) {
         if (isDrawing) {
+            ctx.beginPath();
             ctx.moveTo(startX, startY);
             ctx.lineTo(e.offsetX, e.offsetY);
             ctx.strokeStyle = 'black';
@@ -274,18 +298,9 @@
             ctx.stroke();
 
             var ithFrame = Math.floor((roundTime + Date.now() - startTime) / frameRate);
-            if (ithFrame >= 0 && ithFrame < totalFrames) {
-                if (ithFrame > 0 && drawTrue[ithFrame - 1] == false) {
-                    $.ajax({
-                        url: "/RecordIthFrameDrawing",
-                        data: { drawIndex: drawIndex, frameIndex: ithFrame, drawing: drawString[ithFrame - 1] }
-                    })
-                    drawTrue[ithFrame - 1] = true;
-                }
-                
-                drawString[ithFrame] = drawString[ithFrame] + ";" + startX.toString() + "|" + startY.toString() + "|" + e.offsetX.toString() + "|" + e.offsetY.toString();
-
-            }            
+            if (ithFrame >= 0 && ithFrame < totalFrames) {                
+                drawString[ithFrame] = drawString[ithFrame] + startX.toString(16).padStart(2, '0') + startY.toString(16).padStart(2, '0') + e.offsetX.toString(16).padStart(2, '0') + e.offsetY.toString(16).padStart(2, '0') + ";";
+            }
 
             startX = e.offsetX;
             startY = e.offsetY;
