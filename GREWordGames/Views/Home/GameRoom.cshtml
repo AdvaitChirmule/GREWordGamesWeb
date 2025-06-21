@@ -6,7 +6,87 @@
 <div id="wordPlaceholder"></div>
 
 <label type="form-label" for="guessWord">Guess Word</label>
-<canvas height="300" width="300" id="whiteBoard" class="bg-white"></canvas>
+<div class="container canvas-frame">
+    <div class="row">
+        <canvas id="whiteBoard" class="actual-board bg-white"></canvas>
+    </div>
+    <div class="row canvas-tools p-0">
+        <div class="col-sm-1 p-0">
+            <button onclick="colorSelector(0)" class="black-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-0">
+            <button onclick="colorSelector(1)" class="brown-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-0">
+            <button onclick="colorSelector(2)" class="red-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-0">
+            <button onclick="colorSelector(3)" class="orange-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-0">
+            <button onclick="colorSelector(4)" class="yellow-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-0">
+            <button onclick="colorSelector(5)" class="lime-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-0">
+            <button onclick="colorSelector(6)" class="green-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-0">
+            <button onclick="colorSelector(7)" class="cyan-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-0">
+        </div>
+        <div class="col-sm-1 p-5">
+            <button onclick="widthSelector(0)" class="black-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-4">
+            <button onclick="widthSelector(1)" class="black-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-3">
+            <button onclick="widthSelector(2)" class="black-paint h-100 w-100"></button>
+        </div>
+    </div>
+
+    <div class="row canvas-tools p-0">
+        <div class="col-sm-1 p-0">
+            <button onclick="colorSelector(8)" class="white-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-0">
+            <button onclick="colorSelector(9)" class="lightgrey-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-0">
+            <button onclick="colorSelector(10)" class="grey-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-0">
+            <button onclick="colorSelector(11)" class="pink-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-0">
+            <button onclick="colorSelector(12)" class="magenta-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-0">
+            <button onclick="colorSelector(13)" class="purple-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-0">
+            <button onclick="colorSelector(14)" class="blue-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-0">
+            <button onclick="colorSelector(15)" class="lightblue-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1">
+        </div>
+        <div class="col-sm-1 p-2">
+            <button onclick="widthSelector(3)" class="black-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-1">
+            <button onclick="widthSelector(4)" class="black-paint h-100 w-100"></button>
+        </div>
+        <div class="col-sm-1 p-0">
+            <button onclick="widthSelector(5)" class="black-paint h-100 w-100"></button>
+        </div>
+    </div>
+
+</div>
 <input type="text" class="form-control" id="guessWord" name="guessWord" disabled/>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
@@ -19,6 +99,10 @@
 
     var startX = 0;
     var startY = 0;
+
+    var colorId = 0;
+    var widthId = 1;
+    var colorMap = { "0": "black", "1": "brown", "2": "red", "3": "orange", "4": "yellow", "5": "lime", "6": "green", "7": "cyan", "8": "white", "9": "lightgrey", "10": "grey", "11": "pink", "12": "magenta", "13": "purple", "14": "blue", "15": "lightblue"}
 
     var frameRate = 1000;
     var pauseTime = 5000;
@@ -44,6 +128,14 @@
     var drawString = [];
 
     var lastFrame = 0;
+
+    function colorSelector(id) {
+        colorId = id;
+    }
+
+    function widthSelector(id) {
+        widthId = parseInt(id);
+    }
 
     for (var i = 0; i < totalFrames ; i++) {
         drawTrue.push(false);
@@ -82,6 +174,8 @@
 
         drawTrue = [];
         drawString = [];
+
+        colorId = 0;
 
         lastFrame = 0;
 
@@ -152,8 +246,8 @@
                         ctx.beginPath();
                         ctx.moveTo(parseInt(strokeList[i].slice(0, 2), 16), parseInt(strokeList[i].slice(2, 4), 16));
                         ctx.lineTo(parseInt(strokeList[i].slice(4, 6), 16), parseInt(strokeList[i].slice(6, 8), 16));
-                        ctx.strokeStyle = 'black';
-                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = colorMap[parseInt(strokeList[i].slice(8, 9), 16)];
+                        ctx.lineWidth = parseInt(strokeList[i].slice(9, 10), 16);
                         ctx.stroke();
                     }
                 }
@@ -293,13 +387,13 @@
             ctx.beginPath();
             ctx.moveTo(startX, startY);
             ctx.lineTo(e.offsetX, e.offsetY);
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = colorMap[colorId];
+            ctx.lineWidth = widthId;
             ctx.stroke();
 
             var ithFrame = Math.floor((roundTime + Date.now() - startTime) / frameRate);
             if (ithFrame >= 0 && ithFrame < totalFrames) {                
-                drawString[ithFrame] = drawString[ithFrame] + startX.toString(16).padStart(2, '0') + startY.toString(16).padStart(2, '0') + e.offsetX.toString(16).padStart(2, '0') + e.offsetY.toString(16).padStart(2, '0') + ";";
+                drawString[ithFrame] = drawString[ithFrame] + startX.toString(16).padStart(2, '0') + startY.toString(16).padStart(2, '0') + e.offsetX.toString(16).padStart(2, '0') + e.offsetY.toString(16).padStart(2, '0') + colorId.toString(16) + widthId.toString() + ";";
             }
 
             startX = e.offsetX;

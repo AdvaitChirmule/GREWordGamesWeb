@@ -386,3 +386,119 @@ span {
     border: 1px solid #dee2e6;
     border-radius: 5px;
 }
+
+.canvas-frame{
+    height: 600px;
+    width: 500px;
+    padding: 0px;
+}
+
+.actual-board{
+    height: 480px;
+    width: 480px;
+}
+
+.canvas-tools{
+    height: 70px;
+    width: 490px;
+}
+
+.hidden-element {
+    display: none;
+}
+
+.black-paint, .black-paint:hover, .black-paint:active {
+    padding: 0px;
+    background-color: black;
+    border-radius: 50%;
+}
+
+.brown-paint, .brown-paint:hover, .brown-paint:active {
+    padding: 0px;
+    background-color: brown;
+    border-radius: 50%;
+}
+
+.red-paint, .red-paint:hover, .red-paint:active {
+    padding: 0px;
+    background-color: red;
+    border-radius: 50%;
+}
+
+.orange-paint, .orange-paint:hover, .orange-paint:active {
+    padding: 0px;
+    background-color: orange;
+    border-radius: 50%;
+}
+
+.yellow-paint, .yellow-paint:hover, .yellow-paint:active {
+    padding: 0px;
+    background-color: yellow;
+    border-radius: 50%;
+}
+
+.lime-paint, .lime-paint:hover, .lime-paint:active {
+    padding: 0px;
+    background-color: lime;
+    border-radius: 50%;
+}
+
+.green-paint, .green-paint:hover, .green-paint:active {
+    padding: 0px;
+    background-color: green;
+    border-radius: 50%;
+}
+
+.cyan-paint, .cyan-paint:hover, .cyan-paint:active {
+    padding: 0px;
+    background-color: cyan;
+    border-radius: 50%;
+}
+
+.white-paint, .white-paint:hover, .white-paint:active {
+    padding: 0px;
+    background-color: white;
+    border-radius: 50%;
+}
+
+.lightgrey-paint, .lightgrey-paint:hover, .lightgrey-paint:active {
+    padding: 0px;
+    background-color: lightgrey;
+    border-radius: 50%;
+}
+
+.grey-paint, .grey-paint:hover, .grey-paint:active {
+    padding: 0px;
+    background-color: grey;
+    border-radius: 50%;
+}
+
+.pink-paint, .pink-paint:hover, .pink-paint:active {
+    padding: 0px;
+    background-color: pink;
+    border-radius: 50%;
+}
+
+.magenta-paint, .magenta-paint:hover, .magenta-paint:active {
+    padding: 0px;
+    background-color: magenta;
+    border-radius: 50%;
+}
+
+.purple-paint, .purple-paint:hover, .purple-paint:active {
+    padding: 0px;
+    background-color: purple;
+    border-radius: 50%;
+}
+
+.blue-paint, .blue-paint:hover, .blue-paint:active {
+    padding: 0px;
+    background-color: blue;
+    border-radius: 50%;
+}
+
+.lightblue-paint, .lightblue-paint:hover, .lightblue-paint:active {
+    padding: 0px;
+    background-color: lightblue;
+    border-radius: 50%;
+}
