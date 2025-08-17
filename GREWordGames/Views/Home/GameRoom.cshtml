@@ -1,93 +1,102 @@
 ﻿@{
     ViewData["Title"] = "GameRoom";
 }
+<div class="w-100 h-100">
+    <div class="container w-100 h-100">
+        <div class="row w-100 h-100">
+            <div class="col w-50 h-100 d-flex justify-content-center align-items-center">
+                <div id="timerDiv"></div>
+                <div id="wordPlaceholder"></div>
 
-<div id="timerDiv"></div>
-<div id="wordPlaceholder"></div>
+                <label type="form-label" for="guessWord">Guess Word</label>
 
-<label type="form-label" for="guessWord">Guess Word</label>
-<div class="container canvas-frame">
-    <div class="row">
-        <canvas id="whiteBoard" class="actual-board bg-white"></canvas>
+                <input type="text" class="form-control" id="guessWord" name="guessWord" disabled />
+            </div>
+            <div class="col w-50 h-100 d-flex justify-content-center align-items-center">
+                <div class="container canvas-frame">
+                    <div class="row d-flex justify-content-center align-items-center">
+                        <canvas width="480" height="480" id="whiteBoard" class="bg-white actual-board"></canvas>
+                    </div>
+                    <div class="row canvas-tools p-0 d-flex justify-content-center align-items-center">
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="colorSelector(0)" class="black-paint h-90 w-90"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="colorSelector(1)" class="brown-paint h-90 w-90"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="colorSelector(2)" class="red-paint h-90 w-90"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="colorSelector(3)" class="orange-paint h-90 w-90"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="colorSelector(4)" class="yellow-paint h-90 w-90"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="colorSelector(5)" class="lime-paint h-90 w-90"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="colorSelector(6)" class="green-paint h-90 w-90"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="colorSelector(7)" class="cyan-paint h-90 w-90"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="widthSelector(0)" class="black-paint h-15 w-15"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="widthSelector(1)" class="black-paint h-30 w-30"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="widthSelector(2)" class="black-paint h-45 w-45"></div>
+                        </div>
+                    </div>
+
+                    <div class="row canvas-tools p-0">
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="colorSelector(8)" class="white-paint h-90 w-90"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="colorSelector(9)" class="lightgrey-paint h-90 w-90"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="colorSelector(10)" class="grey-paint h-90 w-90"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="colorSelector(11)" class="pink-paint h-90 w-90"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="colorSelector(12)" class="magenta-paint h-90 w-90"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="colorSelector(13)" class="purple-paint h-90 w-90"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="colorSelector(14)" class="blue-paint h-90 w-90"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="colorSelector(15)" class="lightblue-paint h-90 w-90"></div>
+                        </div>
+                        <div class="col-sm-1">
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="widthSelector(3)" class="black-paint h-60 w-60"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="widthSelector(4)" class="black-paint h-75 w-75"></div>
+                        </div>
+                        <div class="col-sm-1 p-0 canvas-cell d-flex justify-content-center align-items-center">
+                            <div onclick="widthSelector(5)" class="black-paint h-90 w-90"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="row canvas-tools p-0">
-        <div class="col-sm-1 p-0">
-            <button onclick="colorSelector(0)" class="black-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-0">
-            <button onclick="colorSelector(1)" class="brown-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-0">
-            <button onclick="colorSelector(2)" class="red-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-0">
-            <button onclick="colorSelector(3)" class="orange-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-0">
-            <button onclick="colorSelector(4)" class="yellow-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-0">
-            <button onclick="colorSelector(5)" class="lime-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-0">
-            <button onclick="colorSelector(6)" class="green-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-0">
-            <button onclick="colorSelector(7)" class="cyan-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-0">
-        </div>
-        <div class="col-sm-1 p-5">
-            <button onclick="widthSelector(0)" class="black-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-4">
-            <button onclick="widthSelector(1)" class="black-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-3">
-            <button onclick="widthSelector(2)" class="black-paint h-100 w-100"></button>
-        </div>
-    </div>
-
-    <div class="row canvas-tools p-0">
-        <div class="col-sm-1 p-0">
-            <button onclick="colorSelector(8)" class="white-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-0">
-            <button onclick="colorSelector(9)" class="lightgrey-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-0">
-            <button onclick="colorSelector(10)" class="grey-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-0">
-            <button onclick="colorSelector(11)" class="pink-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-0">
-            <button onclick="colorSelector(12)" class="magenta-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-0">
-            <button onclick="colorSelector(13)" class="purple-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-0">
-            <button onclick="colorSelector(14)" class="blue-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-0">
-            <button onclick="colorSelector(15)" class="lightblue-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1">
-        </div>
-        <div class="col-sm-1 p-2">
-            <button onclick="widthSelector(3)" class="black-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-1">
-            <button onclick="widthSelector(4)" class="black-paint h-100 w-100"></button>
-        </div>
-        <div class="col-sm-1 p-0">
-            <button onclick="widthSelector(5)" class="black-paint h-100 w-100"></button>
-        </div>
-    </div>
-
 </div>
-<input type="text" class="form-control" id="guessWord" name="guessWord" disabled/>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script>
@@ -244,10 +253,10 @@
                     var strokeList = response.drawing.split(';');
                     for (let i = 1; i < (strokeList.length - 1); i++) {
                         ctx.beginPath();
-                        ctx.moveTo(parseInt(strokeList[i].slice(0, 2), 16), parseInt(strokeList[i].slice(2, 4), 16));
-                        ctx.lineTo(parseInt(strokeList[i].slice(4, 6), 16), parseInt(strokeList[i].slice(6, 8), 16));
-                        ctx.strokeStyle = colorMap[parseInt(strokeList[i].slice(8, 9), 16)];
-                        ctx.lineWidth = parseInt(strokeList[i].slice(9, 10), 16);
+                        ctx.moveTo(parseInt(strokeList[i].slice(0, 3), 16), parseInt(strokeList[i].slice(3, 6), 16));
+                        ctx.lineTo(parseInt(strokeList[i].slice(6, 9), 16), parseInt(strokeList[i].slice(9, 12), 16));
+                        ctx.strokeStyle = colorMap[parseInt(strokeList[i].slice(12, 13), 16)];
+                        ctx.lineWidth = parseInt(strokeList[i].slice(13, 14), 16);
                         ctx.stroke();
                     }
                 }
@@ -393,7 +402,7 @@
 
             var ithFrame = Math.floor((roundTime + Date.now() - startTime) / frameRate);
             if (ithFrame >= 0 && ithFrame < totalFrames) {                
-                drawString[ithFrame] = drawString[ithFrame] + startX.toString(16).padStart(2, '0') + startY.toString(16).padStart(2, '0') + e.offsetX.toString(16).padStart(2, '0') + e.offsetY.toString(16).padStart(2, '0') + colorId.toString(16) + widthId.toString() + ";";
+                drawString[ithFrame] = drawString[ithFrame] + startX.toString(16).padStart(3, '0') + startY.toString(16).padStart(3, '0') + e.offsetX.toString(16).padStart(3, '0') + e.offsetY.toString(16).padStart(3, '0') + colorId.toString(16) + widthId.toString() + ";";
             }
 
             startX = e.offsetX;

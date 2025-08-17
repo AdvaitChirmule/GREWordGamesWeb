@@ -27,6 +27,10 @@ body {
     min-width: 100%;
 }
 
+.w-15{
+    width: 15%;
+}
+
 .w-30 {
     width: 30% !important;
 }
@@ -35,12 +39,28 @@ body {
     width: 40%;
 }
 
+.w-45{
+    width: 45%;
+}
+
+.w-55{
+    width: 55%;
+}
+
 .w-60 {
     width: 60% !important;
 }
 
+.w-70{
+    width: 70%;
+}
+
 .w-85{
     width: 85%;
+}
+
+.w-90{
+    width: 90%;
 }
 
 .mw-100{
@@ -107,6 +127,14 @@ body {
     height: 40%;
 }
 
+.h-45{
+    height: 45%;
+}
+
+.h-55{
+    height: 55%;
+}
+
 .h-60{
     height: 60%;
 }
@@ -117,6 +145,10 @@ body {
 
 .h-85{
     height: 85%;
+}
+
+.h-90{
+    height: 90%;
 }
 
 .h-95 {
@@ -389,7 +421,7 @@ span {
 
 .canvas-frame{
     height: 600px;
-    width: 500px;
+    width: 520px;
     padding: 0px;
 }
 
@@ -399,8 +431,13 @@ span {
 }
 
 .canvas-tools{
-    height: 70px;
-    width: 490px;
+    height: 50px;
+    width: 520px;
+}
+
+.canvas-cell{
+    height: 40px;
+    width: 40px;
 }
 
 .hidden-element {
