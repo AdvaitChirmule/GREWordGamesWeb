@@ -24,6 +24,7 @@ namespace GREWordGames.Controllers
         private CommonFunctions _commonFunctions;
         private AllWords _practiceWordOrder;
         private MyWordsFunctions _myWordsFunctions;
+        private PracticePageFunctions _practicePageFunctions;
         private RoomFunctions _roomFunctions;
         private GameFunctions _gameFunctions;
 
@@ -45,6 +46,7 @@ namespace GREWordGames.Controllers
             _name = HttpContext.Session.GetString("name");
 
             _myWordsFunctions = new MyWordsFunctions(_token, _uid, HttpContext.Session);
+            _practicePageFunctions = new PracticePageFunctions(_token, _uid, HttpContext.Session);
             _roomFunctions = new RoomFunctions(_token, _uid, HttpContext.Session);
             _gameFunctions = new GameFunctions(_token, _uid, HttpContext.Session);
             base.OnActionExecuting(context);
@@ -290,8 +292,6 @@ namespace GREWordGames.Controllers
                 _practiceWordOrder.words = _commonFunctions.ConvertStringToList(ViewBag.Words);
                 _practiceWordOrder.outcome = _commonFunctions.ConvertStringToList(ViewBag.Proficiency);
 
-                PracticePageFunctions _practicePageFunctions = new PracticePageFunctions(_token, _uid, HttpContext.Session);
-
                 await _practicePageFunctions.UpdateWordProficiencies(_practiceWordOrder);
 
                 return Json(new { success = true });
@@ -368,35 +368,38 @@ namespace GREWordGames.Controllers
             if (name2 == "")
             {
                 await roomFunctions.CloseRoom(roomNumber);
-                return Json(new { success = false, name = "", message = "Closing Room due to no Response" });
+                return Json(new { success = true, canceled = true, name = "", message = "Closing Room due to no response" });
             }
             else
             {
-                return Json(new { success = true, name = name2, message = name2 + " joined the Room!" });
+                return Json(new { success = true, canceled = false, name = name2, message = name2 + " joined the Room!" });
+            }
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GuestWaitToStart(int roomNumber)
+        {
+            bool success = await _roomFunctions.GuestWaitToStart(roomNumber);
+            if (success)
+            {
+                return Json(new { success = true, canceled = false });
+            }
+            else
+            {
+                return Json(new { success = true, canceled = true }); 
             }
         }
 
         [HttpPost]
-        public async Task<ActionResult> WaitToStart(int roomNumber)
+        public ActionResult GuestStart()
         {
-            RoomFunctions _roomFunctions = new RoomFunctions(_token, _uid, HttpContext.Session);
-            bool success = await _roomFunctions.WaitToStart(roomNumber);
-            if (success)
-            {
-                return RedirectToAction("GameRoom");
-            }
-            else
-            {
-                return RedirectToAction("WaitingRoom");
-            }
-
+            return RedirectToAction("GameRoom");
         }
 
         [HttpPost]
         public async Task<ActionResult> StartGame()
         {
-            RoomFunctions roomFunctions = new RoomFunctions(_token, _uid, HttpContext.Session);
-            bool success = await roomFunctions.StartGame();
+            bool success = await _roomFunctions.StartGame();
             if (success)
             {
                 return RedirectToAction("GameRoom");
@@ -405,6 +408,13 @@ namespace GREWordGames.Controllers
             {
                 return RedirectToAction("WaitingRoom");
             }
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> HostCancelGame()
+        {
+            await _roomFunctions.CloseRoom();
+            return Json(new { success = true });
         }
 
         public IActionResult GameRoom()

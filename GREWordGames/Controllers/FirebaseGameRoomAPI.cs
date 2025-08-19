@@ -129,11 +129,17 @@ namespace GREWordGames.Controllers
             return true;
         }
 
-        public async Task<(bool, string)> WaitToStart(int roomNumber)
+        public async Task<(bool, string)> GuestWaitToStart(int roomNumber)
         {
             int checkTimer = 0;
             while (true)
             {
+                bool roomStillOccupied = await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("Occupied").OnceSingleAsync<bool>();
+                if (!roomStillOccupied)
+                {
+                    return (false, "");
+                }
+
                 bool start = await _firebaseClient.Child("rooms").Child(roomNumber.ToString()).Child("StartFlag").OnceSingleAsync<bool>();
                 if (start)
                 {

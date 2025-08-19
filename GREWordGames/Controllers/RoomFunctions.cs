@@ -123,24 +123,28 @@ namespace GREWordGames.Controllers
 
         public async Task CloseRoom(int roomNumber)
         {
+            _session.Remove("roomNumber");
             await _firebaseGameRoomAPI.CloseRoom(roomNumber);
         }
 
-        public async Task<bool> WaitToStart(int roomNumber)
+        public async Task CloseRoom()
         {
-            (bool success, string commonWordsRaw) = await _firebaseGameRoomAPI.WaitToStart(roomNumber);
-            if (success)
+            int roomNumber = _session.GetInt32("roomNumber") ?? -1;
+            if (roomNumber != -1)
             {
-                _session.SetInt32("roomNumber", roomNumber);
-                _session.SetInt32("GamePlayer", 2);
-                _session.SetInt32("Valid", 1);
-                _session.SetString("PlayerAllWords", commonWordsRaw);
-                return true;
+                await _firebaseGameRoomAPI.CloseRoom(roomNumber);
+                _session.Remove("roomNumber");
             }
-            else
-            {
-                return false;
-            }
+        }
+
+        public async Task<bool> GuestWaitToStart(int roomNumber)
+        {
+            (bool success, string commonWordsRaw) = await _firebaseGameRoomAPI.GuestWaitToStart(roomNumber);
+            _session.SetInt32("roomNumber", roomNumber);
+            _session.SetInt32("GamePlayer", 2);
+            _session.SetInt32("Valid", 1);
+            _session.SetString("PlayerAllWords", commonWordsRaw);
+            return success;
         }
 
         public async Task<bool> StartGame()
