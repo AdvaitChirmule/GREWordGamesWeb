@@ -6,47 +6,61 @@
 @model AllWords
 
 <div class="w-100 h-100 bg-light d-flex justify-content-center align-items-center">
-    <div class="container bg-white w-75 h-75">
-        <div class="row w-100 h-100">
-            <div class="col-sm-4 bg-white">
-                <div class="container h-100">
-                    <div class="row h-10"></div>
-                    <div class="row h-20 d-flex justify-content-center align-items-start">
-                        <div class="d-flex justify-content-center"><b>Word</b></div>
-                        <div class="d-flex justify-content-center large-large-font" id="wordAt"></div>
+    <div class="container bg-white w-80 h-90 p-3 card-effect-no-shadow">
+        <div class="row mb-3 bg-light p-3 h-15 card-effect">
+            Welcome to the Practice Page! Here, you'll be given a word at random from your word list. See if you can remember what the meaning of the word is. Once you've made up your mind, tap on "Submit" reveal the actual meaning of the word. You can record to your word list whether your definition was0 right or not by clicking on X or ✓.
+        </div>
+        <div class="row w-100 h-80">
+            <div class="col-sm-4 p-3">
+                <div class="container h-100 bg-white">
+                    <div class="row h-30 d-flex justify-content-center align-items-start bg-light card-effect p-2">
+                        <div class="container h-100 w-100">
+                            <div class="row h-15"></div>
+                            <div class="row h-30 d-flex justify-content-center"><b>Word</b></div>
+                            <div class="row h-40 d-flex justify-content-center large-large-font" id="wordAt"></div>
+                            <div class="row h-15"></div>
+                        </div>
                     </div>
                     <div class="row h-10"></div>
-                    <div class="row h-20 d-flex justify-content-center align-items-center">
-                        <div id="dateStarted"></div>
-                        <div id="successRate"></div>
-                        <div><b>All Words:</b></div>
-                    </div>
-                    <div class="row h-40 p-3" id="tickButtons">
-                        <div class="col-sm h-100" id="tickButtonGroup0"></div>
-                        <div class="col-sm h-100" id="tickButtonGroup1"></div>
-                        <div class="col-sm h-100" id="tickButtonGroup2"></div>
-                        <div class="col-sm h-100" id="tickButtonGroup3"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-8 p-0">
-                <div class="row w-100 h-50">
-                    <div class="flipCard w-100 h-100 p-0">
-                        <div class="flipCardInner" id="cardFlip">
-                            <div class="flipCardFront">
-                                <button class="btn secondary-button h-100 w-100 large-large-font" id="wordPlaceholder" onclick="submitWord()">Submit</button>
-                            </div>
-                            <div class="flipCardBack white-background" id="wordMeaningPlaceholder">
+                    <div class="row h-65 bg-light card-effect p-2">
+                        <div class="row h-45 d-flex justify-content-center align-items-center">
+                            <div id="dateStarted"></div>
+                            <div id="successRate"></div>
+                            <div><b>All Words:</b></div>
+                        </div>
+                        <div class="row h-55 p-1" id="tickButtons">
+                            <div class="container h-100 w-100">
+                                <div class="row h-90">
+                                    <div class="col-sm h-100" id="tickButtonGroup0"></div>
+                                    <div class="col-sm h-100" id="tickButtonGroup1"></div>
+                                    <div class="col-sm h-100" id="tickButtonGroup2"></div>
+                                    <div class="col-sm h-100" id="tickButtonGroup3"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="row w-100 h-50">
-                    <div class="col-sm w-50 h-100">
-                        <button class="btn p-0 mb-0 bg-white w-100 h-100 p-5" id="wrongButton" onclick="registerWrongAndGetNewWord()"><img src="~/images/Wrong.png" class="fit-image" /></button>
+            </div>
+            <div class="col-sm-8 p-3">
+                <div class="h-100 w-100 card-effect-no-shadow">
+                    <div class="row w-100 h-50">
+                        <div class="flipCard w-100 h-100 p-0">
+                            <div class="flipCardInner" id="cardFlip">
+                                <div class="flipCardFront">
+                                    <button class="btn secondary-button-variant h-100 w-100 large-large-font" id="wordPlaceholder" onclick="submitWord()">Submit</button>
+                                </div>
+                                <div class="flipCardBack white-background" id="wordMeaningPlaceholder">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-sm w-50 h-100">
-                        <button class="btn p-0 mb-0 bg-white w-100 h-100 p-5" id="rightButton" onclick="registerRightAndGetNewWord()"><img src="~/images/Right.png" class="fit-image" /></button>
+                    <div class="row w-100 h-50 bg-light">
+                        <div class="w-50 h-100 p-0">
+                            <button class="btn p-0 mb-0 w-100 h-100 p-5 card-effect-no-shadow" id="wrongButton" onclick="registerWrongAndGetNewWord()"><img src="~/images/WrongLight.png" class="fit-image" /></button>
+                        </div>
+                        <div class="w-50 h-100 p-0">
+                            <button class="btn p-0 mb-0 w-100 h-100 p-5 card-effect-no-shadow" id="rightButton" onclick="registerRightAndGetNewWord()"><img src="~/images/RightLight.png" class="fit-image" /></button>
+                        </div>
                     </div>
                 </div>
             </div>
