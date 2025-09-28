@@ -155,6 +155,10 @@ body {
     height: 60%;
 }
 
+.h-65{
+    height: 65%;
+}
+
 .h-70{
     height: 70%;
 }
@@ -252,6 +256,10 @@ body {
     color: #3E2A5D;
 }
 
+.title-background {
+    background-color: #F5C518bb;
+}
+
 .white-background {
     background-color: white;
     color: #3E2A5D;
@@ -294,8 +302,10 @@ body {
 
 .secondary-button-variant {
     background-color: #f8f9fa;
-    border-color: #ced4da;
+    border: 1px solid #ced4da !important;
+    border-radius: 5px !important;
     color: #3E2A5D;
+    margin: 0px;
 }
 
 .secondary-button-variant:hover {
@@ -373,7 +383,6 @@ a {
     background-color: transparent;
     width: 300px;
     height: 200px;
-    border: 1px solid #f1f1f1;
     perspective: 1000px;
 }
 
@@ -394,6 +403,7 @@ a {
     position: absolute;
     width: 100%;
     height: 100%;
+    border: 1px solid #f1f1f1;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
 }
@@ -436,6 +446,10 @@ a {
 
 .large-large-font{
     font-size: 32px;
+}
+
+.title-font{
+    font-size: 54px;
 }
 
 span {
